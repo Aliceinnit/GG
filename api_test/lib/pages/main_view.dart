@@ -1,13 +1,12 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:api_test/app_theme.dart';
 import 'package:api_test/model/imat/product.dart';
-import 'package:api_test/model/imat/util/functions.dart';
 import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/pages/account_view.dart';
 import 'package:api_test/pages/history_view.dart';
 import 'package:api_test/widgets/cart_view.dart';
 import 'package:api_test/widgets/product_tile.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class MainView extends StatelessWidget {
   const MainView({super.key});
@@ -18,26 +17,19 @@ class MainView extends StatelessWidget {
     var products = iMat.selectProducts;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFCEEF4), // Ljus bakgrund
       body: Column(
         children: [
-          SizedBox(height: AppTheme.paddingLarge),
-          _header(context),
-          SizedBox(height: AppTheme.paddingMedium),
+          const SizedBox(height: AppTheme.paddingLarge),
+          _header(context, iMat),
+          const SizedBox(height: AppTheme.paddingMedium),
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _leftPanel(iMat),
-                Container(
-                  width: 580,
-                  //height: 400,
-                  child: _centerStage(context, products),
-                ),
-                Container(
-                  width: 300,
-                  //color: Colors.blueGrey,
-                  child: _shoppingCart(iMat),
-                ),
+                Expanded(child: _centerStage(context, products)),
+                _shoppingCart(iMat),
               ],
             ),
           ),
@@ -46,87 +38,100 @@ class MainView extends StatelessWidget {
     );
   }
 
-  Widget _shoppingCart(ImatDataHandler iMat) {
-    return Column(
-      children: [
-        Text('Kundvagn'),
-        Container(height: 600, child: CartView()),
-        ElevatedButton(
-          onPressed: () {
-            iMat.placeOrder();
-          },
-          child: Text('Köp!'),
-        ),
-      ],
+  Widget _header(BuildContext context, ImatDataHandler iMat) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingMedium),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // iMat-logotyp
+          const Text(
+            "iMat",
+            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+          ),
+
+          // Sökfält
+          SizedBox(
+            width: 300,
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: "Sök varor",
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+            ),
+          ),
+
+          // Ikoner till höger
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.list),
+                tooltip: 'Mina inköp',
+                onPressed: () => _showHistory(context),
+              ),
+              IconButton(
+                icon: const Icon(Icons.favorite_border),
+                tooltip: 'Favoriter',
+                onPressed: () => iMat.selectFavorites(),
+              ),
+              IconButton(
+                icon: const Icon(Icons.shopping_bag_outlined),
+                tooltip: 'Varukorg',
+                onPressed: () {}, // valfri
+              ),
+              IconButton(
+                icon: const Icon(Icons.person_outline),
+                tooltip: 'Logga in',
+                onPressed: () => _showAccount(context),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  Container _leftPanel(ImatDataHandler iMat) {
+  Widget _leftPanel(ImatDataHandler iMat) {
+    final categories = [
+      'Erbjudanden',
+      'Kött, fågel',
+      'Frukt och grönt',
+      'Mejeri',
+      'Bröd och kaffebröd',
+      'Fryst',
+      'Fisk och skaldjur',
+      'Färdigmat',
+      'Vegetarisk',
+      'Godis, snacks',
+      'Dryck',
+      'Blommor',
+    ];
+
     return Container(
-      width: 300,
-      color: const Color.fromARGB(255, 154, 172, 134),
+      width: 220,
+      color: Colors.white,
+      padding: const EdgeInsets.all(12),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: AppTheme.paddingSmall),
-          SizedBox(
-            width: 132,
-            child: ElevatedButton(
-              onPressed: () {
-                iMat.selectAllProducts();
-              },
-              child: Text('Visa allt'),
-            ),
-          ),
-          SizedBox(height: AppTheme.paddingSmall),
-          SizedBox(
-            width: 132,
-            child: ElevatedButton(
-              onPressed: () {
-                //print('Favoriter');
-                iMat.selectFavorites();
-              },
-              child: Text('Favoriter'),
-            ),
-          ),
-          SizedBox(height: AppTheme.paddingSmall),
-          SizedBox(
-            width: 132,
-            child: ElevatedButton(
-              onPressed: () {
-                var products = iMat.products;
-                iMat.selectSelection([
-                  products[4],
-                  products[45],
-                  products[68],
-                  products[102],
-                  products[110],
-                ]);
-              },
-              child: Text('Urval'),
-            ),
-          ),
-          SizedBox(height: AppTheme.paddingSmall),
-          SizedBox(
-            width: 132,
-            child: ElevatedButton(
-              onPressed: () {
-                //print('Frukt');
-                iMat.selectSelection(
-                  iMat.findProductsByCategory(ProductCategory.CABBAGE),
+          const Text('Kategorier', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          Expanded(
+            child: ListView.builder(
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  dense: true,
+                  title: Text(categories[index]),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  onTap: () {
+                    // Koppla till din kategori-filter
+                    // Ex: iMat.selectSelection(iMat.findProductsByCategory(...));
+                  },
                 );
               },
-              child: Text('Grönsaker'),
-            ),
-          ),
-          SizedBox(height: AppTheme.paddingSmall),
-          SizedBox(
-            width: 132,
-            child: ElevatedButton(
-              onPressed: () {
-                //print('Söktest');
-                iMat.selectSelection(iMat.findProducts('mj'));
-              },
-              child: Text('Söktest'),
             ),
           ),
         ],
@@ -134,54 +139,56 @@ class MainView extends StatelessWidget {
     );
   }
 
-  Row _header(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        ElevatedButton(onPressed: () {}, child: Text('iMat')),
-        Row(
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                dbugPrint('Historik-knapp');
-                _showHistory(context);
-              },
-              child: Text('Köphistorik'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                _showAccount(context);
-              },
-              child: Text('Användare'),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   Widget _centerStage(BuildContext context, List<Product> products) {
-    // ListView.builder has the advantage that tiles
-    // are built as needed.
-    return ListView.builder(
+    return GridView.builder(
+      padding: const EdgeInsets.all(8),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4, // 4 kolumner per rad
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 0.8,
+      ),
       itemCount: products.length,
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (context, index) {
         return ProductTile(products[index]);
       },
     );
   }
 
-  void _showAccount(context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => AccountView()),
+  Widget _shoppingCart(ImatDataHandler iMat) {
+    return Container(
+      width: 280,
+      padding: const EdgeInsets.all(16),
+      color: const Color(0xFFFAF7F9),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Kundvagn', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          SizedBox(height: 500, child: CartView()),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: () {
+              iMat.placeOrder();
+            },
+            child: const Text('Köp!'),
+          ),
+        ],
+      ),
     );
   }
 
-  void _showHistory(context) {
+  void _showAccount(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => HistoryView()),
+      MaterialPageRoute(builder: (context) => const AccountView()),
+    );
+  }
+
+  void _showHistory(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HistoryView()),
     );
   }
 }
