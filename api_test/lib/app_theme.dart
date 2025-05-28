@@ -9,6 +9,6 @@ class AppTheme {
   static const double paddingHuge = 32.0;
 
   static ColorScheme colorScheme = ColorScheme.fromSeed(
-    seedColor: Colors.green,
+    seedColor: const Color.fromARGB(255, 89, 159, 91),
   );
 }

@@ -21,19 +21,20 @@ class AccountView extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      color: const Color(0xFFD7F5D2), 
+      color: const Color(0xffd2ebd8), 
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      height: 120,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           TextButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/'); // eller din startsidas route
+              Navigator.pushNamed(context, '/'); 
             },
             child: const Text(
               'iMat',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 40,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF3A2C4B),
               ),
@@ -41,19 +42,17 @@ class AccountView extends StatelessWidget {
     ),
           Row(
             children: [
-              TextButton(
+              IconButton(
+                icon: const Icon(Icons.shopping_bag_outlined),
+                tooltip: 'Varukorg',
                 onPressed: () {},
-                child: const Text('Fortsätt handla'),
+                iconSize: 70, // valfri
               ),
-              const SizedBox(width: 16),
-              TextButton(
-                onPressed: () {},
-                child: const Text('Varukorg'),
-              ),
-              const SizedBox(width: 8),
-              TextButton(
-                onPressed: () {},
-                child: const Text('Mina sidor'),
+              IconButton(
+                icon: const Icon(Icons.person_outline),
+                tooltip: 'Logga in',
+                onPressed: () => _showAccount(context),
+                iconSize: 70,
               ),
             ],
           ),
@@ -61,14 +60,17 @@ class AccountView extends StatelessWidget {
       ),
     );
   }
-
+ /*TextButton(
+                onPressed: () {},
+                child: const Text('Fortsätt handla'),
+              ),*/
   Widget _buildFormCard(BuildContext context) {
     return Center(
       child: Container(
         padding: const EdgeInsets.all(24),
         width: 600,
         decoration: BoxDecoration(
-          color: const Color(0xFFD7F5D2), 
+          color: const Color(0xffd2ebd8), 
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -140,6 +142,12 @@ class AccountView extends StatelessWidget {
         SizedBox(height: 12),
         TextField(decoration: InputDecoration(labelText: 'Utgångsdatum')),
       ],
+    );
+  }
+  void _showAccount(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AccountView()),
     );
   }
 }
