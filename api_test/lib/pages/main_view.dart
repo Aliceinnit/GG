@@ -6,49 +6,85 @@ import 'package:api_test/model/imat/product.dart';
 import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/pages/account_view.dart';
 import 'package:api_test/pages/checkout_flow.dart';
+import 'package:api_test/pages/history_view.dart';
 import 'package:api_test/widgets/cart_view.dart';
 import 'package:api_test/widgets/product_tile.dart';
 import 'package:api_test/widgets/app_navigation_bar.dart';
 
-class MainView extends StatelessWidget {
-  const MainView({super.key});  @override
+class MainView extends StatefulWidget {
+  const MainView({super.key});
+
+  @override
+  State<MainView> createState() => _MainViewState();
+}
+
+class _MainViewState extends State<MainView> with TickerProviderStateMixin {
+  bool _showSidebar = false;
+  bool _showCartOverlay = false;
+  late AnimationController _animationController;
+  late Animation<Offset> _cartSlideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _cartSlideAnimation = Tween<Offset>(
+      begin: const Offset(1.0, 0.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var iMat = context.watch<ImatDataHandler>();
-    var products = iMat.selectProducts;
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFFCEEF4),
+    var products = iMat.selectProducts;    return Scaffold(
+      backgroundColor: AppTheme.background,
       body: Stack(
         children: [
-          // Use the new navigation bar
-          AppNavigationBar(
-            onSearch: (query) {
-              // Implement search functionality using findProducts method
-              if (query.isNotEmpty) {
-                final searchResults = iMat.findProducts(query);
-                iMat.selectSelection(searchResults);
-              } else {
-                iMat.selectAllProducts();
-              }
-            },
-            onCartPressed: () {
-              // You can implement cart modal or navigation here
-              _showCartModal(context, iMat);
-            },
-            onAccountPressed: () {
-              _showAccount(context);
-            },
-          ),
-          const SizedBox(height: AppTheme.paddingMedium),
-          Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _leftPanel(iMat),
-                Expanded(child: _centerStage(context, products)),
-                _shoppingCart(context, iMat),
-              ],
-            ),
+          Column(
+            children: [
+              // Use the new navigation bar
+              AppNavigationBar(
+                onSearch: (query) {
+                  // Implement search functionality using findProducts method
+                  if (query.isNotEmpty) {
+                    final searchResults = iMat.findProducts(query);
+                    iMat.selectSelection(searchResults);
+                  } else {
+                    iMat.selectAllProducts();
+                  }
+                },
+                onCartPressed: () {
+                  // You can implement cart modal or navigation here
+                  _showCartModal(context, iMat);
+                },
+                onAccountPressed: () {
+                  _showAccount(context);
+                },
+              ),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _leftPanel(iMat),
+                    Expanded(child: _centerStage(context, products)),
+                    _shoppingCart(context, iMat),
+                  ],
+                ),
+              ),
+            ],
           ),
 
           if (_showSidebar || _showCartOverlay)
@@ -343,11 +379,17 @@ class MainView extends StatelessWidget {
         ],
       ),
     );
-  }
-  void _showAccount(BuildContext context) {
+  }  void _showAccount(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AccountView()),
+    );
+  }
+
+  void _showHistory(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HistoryView()),
     );
   }
 }

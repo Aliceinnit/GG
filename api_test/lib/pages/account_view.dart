@@ -3,6 +3,7 @@ import 'package:api_test/widgets/app_navigation_bar.dart';
 
 class AccountView extends StatelessWidget {
   const AccountView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,6 +21,7 @@ class AccountView extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildFormCard(BuildContext context) {
     return Center(
       child: Container(
@@ -55,15 +57,22 @@ class AccountView extends StatelessWidget {
                 backgroundColor: const Color(0xFF3A2C4B),
               ),
               child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: Text(
-                'Skapa konto',
-                style: TextStyle(
-                  color: Color(0xFFFFF0F5), 
-                  fontWeight: FontWeight.bold,
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                child: Text(
+                  'Skapa konto',
+                  style: TextStyle(
+                    color: Color(0xFFFFF0F5), 
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildPersonalInfoColumn() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,12 +100,6 @@ class AccountView extends StatelessWidget {
         SizedBox(height: 12),
         TextField(decoration: InputDecoration(labelText: 'Utgångsdatum')),
       ],
-    );
-  }
-  void _showAccount(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AccountView()),
     );
   }
 }
