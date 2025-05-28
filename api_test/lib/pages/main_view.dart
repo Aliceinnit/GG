@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:api_test/widgets/categories/hover_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:api_test/app_theme.dart';
@@ -245,20 +246,21 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
   }
 
   Widget _leftPanel(ImatDataHandler iMat) {
-    final categories = [
-      'Erbjudanden',
-      'Kött, fågel',
-      'Frukt och grönt',
-      'Mejeri',
-      'Bröd och kaffebröd',
-      'Fryst',
-      'Fisk och skaldjur',
-      'Färdigmat',
-      'Vegetarisk',
-      'Godis, snacks',
-      'Dryck',
-      'Blommor',
-    ];
+    final Map<String, List<String>> categories = {
+      'Erbjudanden': ['Visa alla', 'Rabattvaror', 'Veckans kampanj'],
+      'Kött, fågel': ['Visa alla', 'Nötkött', 'Kyckling', 'Fläskkött', 'Pålägg', 'Korv', 'Chark'],
+      'Frukt och grönt': ['Visa alla', 'Frukt', 'Bär', 'Grönsaker', 'Rotfrukter', 'Ekologiskt'],
+      'Mejeri': ['Visa alla', 'Mjölk & grädde', 'Yoghurt', 'Ost', 'Smör & margarin', 'Ägg'],
+      'Bröd och kaffebröd': ['Visa alla', 'Matbröd', 'Frallor', 'Kakor', 'Fikabröd'],
+      'Skafferi': ['Visa alla', 'Pasta & ris', 'Konserver', 'Kryddor', 'Bakprodukter'],
+      'Fryst': ['Visa alla', 'Frysta grönsaker', 'Glass', 'Pizza', 'Bär', 'Färdigmat fryst'],
+      'Fisk och skaldjur': ['Visa alla', 'Färsk fisk', 'Fryst fisk', 'Skaldjur', 'Inlagd fisk'],
+      'Färdigmat': ['Visa alla', 'Sallader', 'Färdiga rätter', 'Soppor', 'Smörgåsar'],
+      'Vegetarisk': ['Visa alla', 'Vegokött', 'Veganska produkter', 'Vegetariska rätter'],
+      'Godis, snacks': ['Visa alla', 'Godis', 'Chips', 'Choklad', 'Nötter'],
+      'Dryck': ['Visa alla', 'Läsk', 'Juice', 'Kaffe & te', 'Energidryck', 'Vatten'],
+      'Blommor': ['Visa alla', 'Snittblommor', 'Krukväxter', 'Buketter'],
+    };
 
     return Container(
       width: 220,
@@ -267,19 +269,26 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Kategorier', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text('Kategorier', style: AppTheme.headingMedium),
           const SizedBox(height: 12),
           Expanded(
-            child: ListView.builder(
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  dense: true,
-                  title: Text(categories[index]),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {},
+            child: ListView(
+              children: categories.entries.map((entry) {
+                final categoryName = entry.key;
+                final subcategories = entry.value;
+
+                return ExpansionTile(
+                  title: Text(categoryName),
+                  children: subcategories.map((subcategory) {
+                    return HoverListTile(
+                      title: subcategory,
+                      onTap: () {
+                        print('Vald underkategori: $subcategory');
+                      },
+                    );
+                  }).toList(),
                 );
-              },
+              }).toList(),
             ),
           ),
         ],
