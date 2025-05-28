@@ -25,12 +25,22 @@ migrate_working_dir/
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
+**/.dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
 .pub-cache/
 .pub/
 /build/
+**/build/
+
+# Dart tool specific files
+.dart_tool/chrome-device/
+.dart_tool/dartpad/
+.dart_tool/extension_discovery/
+.dart_tool/package_config.json
+.dart_tool/package_config_subset
+.dart_tool/version
 
 # Symbolication related
 app.*.symbols
@@ -123,3 +133,77 @@ coverage/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+api_test/.dart_tool/chrome-device/Default/History
+api_test/.dart_tool/chrome-device/Default/BrowsingTopicsState
+api_test/.dart_tool/chrome-device/Default/DIPS
+api_test/.dart_tool/chrome-device/Default/Favicons
+api_test/.dart_tool/chrome-device/Default/History
+api_test/.dart_tool/chrome-device/Default/passkey_enclave_state
+api_test/.dart_tool/chrome-device/Default/Preferences
+api_test/.dart_tool/chrome-device/Default/Web Data
+api_test/.dart_tool/chrome-device/Default/Extension State/LOG
+api_test/.dart_tool/chrome-device/Default/Extension State/LOG.old
+api_test/.dart_tool/chrome-device/Default/GCM Store/Encryption/LOG
+api_test/.dart_tool/chrome-device/Default/GCM Store/Encryption/LOG.old
+api_test/.dart_tool/chrome-device/Default/Local Storage/leveldb/000003.log
+api_test/.dart_tool/chrome-device/Default/Local Storage/leveldb/LOG
+api_test/.dart_tool/chrome-device/Default/Local Storage/leveldb/LOG.old
+api_test/.dart_tool/chrome-device/Default/Network/Network Persistent State
+api_test/.dart_tool/chrome-device/Default/Network/Reporting and NEL
+api_test/.dart_tool/chrome-device/Default/Network/TransportSecurity
+api_test/.dart_tool/chrome-device/Default/Service Worker/Database/000003.log
+api_test/.dart_tool/chrome-device/Default/Service Worker/Database/LOG
+api_test/.dart_tool/chrome-device/Default/Service Worker/Database/LOG.old
+api_test/.dart_tool/chrome-device/Default/Service Worker/ScriptCache/index-dir/the-real-index
+api_test/.dart_tool/chrome-device/Default/Session Storage/000003.log
+api_test/.dart_tool/chrome-device/Default/Session Storage/LOG
+api_test/.dart_tool/chrome-device/Default/Session Storage/LOG.old
+api_test/.dart_tool/chrome-device/Default/Shared Dictionary/cache/index-dir/the-real-index
+api_test/.dart_tool/chrome-device/Default/shared_proto_db/LOG
+api_test/.dart_tool/chrome-device/Default/shared_proto_db/LOG.old
+api_test/.dart_tool/chrome-device/Default/shared_proto_db/metadata/000003.log
+api_test/.dart_tool/chrome-device/Default/shared_proto_db/metadata/LOG
+api_test/.dart_tool/chrome-device/Default/shared_proto_db/metadata/LOG.old
+api_test/.dart_tool/chrome-device/Default/Site Characteristics Database/000003.log
+api_test/.dart_tool/chrome-device/Default/Site Characteristics Database/LOG
+api_test/.dart_tool/chrome-device/Default/Site Characteristics Database/LOG.old
+api_test/.dart_tool/chrome-device/Default/Sync Data/LevelDB/LOG
+api_test/.dart_tool/chrome-device/Default/Sync Data/LevelDB/LOG.old
+api_test/.dart_tool/chrome-device/Default/WebStorage/QuotaManager
+api_test/build/cache.dill.track.dill
+api_test/.dart_tool/chrome-device/Default/DIPS
+api_test/.dart_tool/chrome-device/Default/Favicons
+api_test/.dart_tool/chrome-device/Default/History
+api_test/.dart_tool/chrome-device/Default/passkey_enclave_state
+api_test/.dart_tool/chrome-device/Default/Preferences
+api_test/.dart_tool/chrome-device/Default/Web Data
+api_test/.dart_tool/chrome-device/Default/Extension State/LOG
+api_test/.dart_tool/chrome-device/Default/Extension State/LOG.old
+api_test/.dart_tool/chrome-device/Default/GCM Store/Encryption/LOG
+api_test/.dart_tool/chrome-device/Default/GCM Store/Encryption/LOG.old
+api_test/.dart_tool/chrome-device/Default/Local Storage/leveldb/000003.log
+api_test/.dart_tool/chrome-device/Default/Local Storage/leveldb/LOG
+api_test/.dart_tool/chrome-device/Default/Local Storage/leveldb/LOG.old
+api_test/.dart_tool/chrome-device/Default/Network/Network Persistent State
+api_test/.dart_tool/chrome-device/Default/Network/Reporting and NEL
+api_test/.dart_tool/chrome-device/Default/Network/TransportSecurity
+api_test/.dart_tool/chrome-device/Default/Service Worker/Database/000003.log
+api_test/.dart_tool/chrome-device/Default/Service Worker/Database/LOG
+api_test/.dart_tool/chrome-device/Default/Service Worker/Database/LOG.old
+api_test/.dart_tool/chrome-device/Default/Service Worker/ScriptCache/index-dir/the-real-index
+api_test/.dart_tool/chrome-device/Default/Session Storage/000003.log
+api_test/.dart_tool/chrome-device/Default/Session Storage/LOG
+api_test/.dart_tool/chrome-device/Default/Session Storage/LOG.old
+api_test/.dart_tool/chrome-device/Default/Shared Dictionary/cache/index-dir/the-real-index
+api_test/.dart_tool/chrome-device/Default/shared_proto_db/LOG
+api_test/.dart_tool/chrome-device/Default/shared_proto_db/LOG.old
+api_test/.dart_tool/chrome-device/Default/shared_proto_db/metadata/000003.log
+api_test/.dart_tool/chrome-device/Default/shared_proto_db/metadata/LOG
+api_test/.dart_tool/chrome-device/Default/shared_proto_db/metadata/LOG.old
+api_test/.dart_tool/chrome-device/Default/Site Characteristics Database/000003.log
+api_test/.dart_tool/chrome-device/Default/Site Characteristics Database/LOG
+api_test/.dart_tool/chrome-device/Default/Site Characteristics Database/LOG.old
+api_test/.dart_tool/chrome-device/Default/Sync Data/LevelDB/LOG
+api_test/.dart_tool/chrome-device/Default/Sync Data/LevelDB/LOG.old
+api_test/.dart_tool/chrome-device/Default/WebStorage/QuotaManager
+api_test/build/cache.dill.track.dill
