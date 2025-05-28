@@ -12,8 +12,8 @@ class AppTheme {
   // Color constants
   static const Color primaryPurple = Color(0xFF3E2A5E); // Icons and buttons
   static const Color headerGreen = Color(0xFFD2EBD8);   // Header and widget backgrounds
-  static const Color buttonText = Colors.white;          // Text on buttons
-  static const Color background = Colors.white;          // Overall background
+  static const Color buttonText = Color.fromRGBO(255, 255, 255, 1);          // Text on buttons
+  static const Color background = Color(0xFFFAE8ED);          // Overall background
   
   // Additional common colors
   static const Color textPrimary = Color(0xFF3E2A5E);    // Primary text color
@@ -26,8 +26,8 @@ class AppTheme {
   static ColorScheme colorScheme = ColorScheme.fromSeed(
     seedColor: primaryPurple,
     primary: primaryPurple,
-    surface: background,
-    background: background,
+    surface: Color(0xFFD2EBD8),
+    background: Color(0xFFD2EBD8),
   );
   // Button styles
   static ButtonStyle primaryButtonStyle = ElevatedButton.styleFrom(
