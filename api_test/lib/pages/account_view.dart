@@ -26,7 +26,7 @@ class AccountView extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         width: 600,
         decoration: BoxDecoration(
-          color: const Color(0xFFD7F5D2), 
+          color: const Color(0xffd2ebd8), 
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -64,13 +64,6 @@ class AccountView extends StatelessWidget {
                 ),
               ),
             ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildPersonalInfoColumn() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,6 +91,12 @@ class AccountView extends StatelessWidget {
         SizedBox(height: 12),
         TextField(decoration: InputDecoration(labelText: 'Utgångsdatum')),
       ],
+    );
+  }
+  void _showAccount(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AccountView()),
     );
   }
 }

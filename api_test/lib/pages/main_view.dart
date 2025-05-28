@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:api_test/app_theme.dart';
@@ -16,8 +17,8 @@ class MainView extends StatelessWidget {
     var products = iMat.selectProducts;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFCEEF4), // Ljus bakgrund
-      body: Column(
+      backgroundColor: const Color(0xFFFCEEF4),
+      body: Stack(
         children: [
           // Use the new navigation bar
           AppNavigationBar(
@@ -49,6 +50,123 @@ class MainView extends StatelessWidget {
               ],
             ),
           ),
+
+          if (_showSidebar || _showCartOverlay)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _showSidebar = false;
+                    _showCartOverlay = false;
+                  });
+                  _animationController.reverse();
+                },
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+                  child: Container(
+                    color: Colors.black.withOpacity(0.3),
+                  ),
+                ),
+              ),
+            ),
+
+          if (_showSidebar)
+            Positioned(
+              top: 120,
+              right: 0,
+              child: Container(
+                width: 250,
+                height: MediaQuery.of(context).size.height - 120,
+                color: const Color(0xffd2ebd8),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => setState(() => _showSidebar = false),
+                      ),
+                    ),
+                    const Text("Mina sidor", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 20),
+                    ListTile(
+                      leading: const Icon(Icons.favorite),
+                      title: const Text("Favoriter"),
+                      onTap: () {
+                        setState(() => _showSidebar = false);
+                        iMat.selectFavorites();
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.history),
+                      title: const Text("Tidigare inköp"),
+                      onTap: () {
+                        setState(() => _showSidebar = false);
+                        _showHistory(context);
+                      },
+                    ),
+                    const Spacer(),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF3A2C4B), // Mörklila
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
+                      onPressed: () => _showAccount(context),
+                      child: const Text(
+                        'Logga in',
+                        style: TextStyle(color: Color(0xFFFCEEF4)), // Ljusrosa
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+          if (_showCartOverlay)
+            Positioned(
+              top: 120,
+              right: 0,
+              child: SlideTransition(
+                position: _cartSlideAnimation,
+                child: Container(
+                  width: 320,
+                  height: MediaQuery.of(context).size.height - 120,
+                  color: const Color(0xffd2ebd8),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: IconButton(
+                          icon: const Icon(Icons.close),
+                          tooltip: 'Stäng',
+                          onPressed: () {
+                            setState(() => _showCartOverlay = false);
+                            _animationController.reverse();
+                          },
+                        ),
+                      ),
+                      const Text('Kundvagn', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 12),
+                      Expanded(child: CartView()),
+                      const SizedBox(height: 12),
+                      ElevatedButton(
+                        onPressed: () {
+                          iMat.placeOrder();
+                        },
+                        child: const Text('Köp!'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -153,7 +271,7 @@ class MainView extends StatelessWidget {
 
     return Container(
       width: 220,
-      color: Colors.white,
+      color: const Color(0xfffae8ed),
       padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,10 +286,7 @@ class MainView extends StatelessWidget {
                   dense: true,
                   title: Text(categories[index]),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    // Koppla till din kategori-filter
-                    // Ex: iMat.selectSelection(iMat.findProductsByCategory(...));
-                  },
+                  onTap: () {},
                 );
               },
             ),
@@ -185,7 +300,7 @@ class MainView extends StatelessWidget {
     return GridView.builder(
       padding: const EdgeInsets.all(8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4, // 4 kolumner per rad
+        crossAxisCount: 4,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
         childAspectRatio: 0.8,
