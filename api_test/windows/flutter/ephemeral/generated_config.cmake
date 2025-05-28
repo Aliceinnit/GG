@@ -1,6 +1,6 @@
 # Generated code do not commit.
-file(TO_CMAKE_PATH "C:\\Users\\ellal\\Documents\\flutter" FLUTTER_ROOT)
-file(TO_CMAKE_PATH "C:\\Users\\ellal\\Documents\\granssnitt\\api_test" PROJECT_DIR)
+file(TO_CMAKE_PATH "C:\\Users\\grevi\\Documents\\labb1\\flutter" FLUTTER_ROOT)
+file(TO_CMAKE_PATH "C:\\Users\\grevi\\Documents\\imat\\GG\\api_test" PROJECT_DIR)
 
 set(FLUTTER_VERSION "1.0.0+1" PARENT_SCOPE)
 set(FLUTTER_VERSION_MAJOR 1 PARENT_SCOPE)
@@ -10,14 +10,14 @@ set(FLUTTER_VERSION_BUILD 1 PARENT_SCOPE)
 
 # Environment variables to pass to tool_backend.sh
 list(APPEND FLUTTER_TOOL_ENVIRONMENT
-  "FLUTTER_ROOT=C:\\Users\\ellal\\Documents\\flutter"
-  "PROJECT_DIR=C:\\Users\\ellal\\Documents\\granssnitt\\api_test"
-  "FLUTTER_ROOT=C:\\Users\\ellal\\Documents\\flutter"
-  "FLUTTER_EPHEMERAL_DIR=C:\\Users\\ellal\\Documents\\granssnitt\\api_test\\windows\\flutter\\ephemeral"
-  "PROJECT_DIR=C:\\Users\\ellal\\Documents\\granssnitt\\api_test"
-  "FLUTTER_TARGET=C:\\Users\\ellal\\Documents\\granssnitt\\api_test\\lib\\main.dart"
+  "FLUTTER_ROOT=C:\\Users\\grevi\\Documents\\labb1\\flutter"
+  "PROJECT_DIR=C:\\Users\\grevi\\Documents\\imat\\GG\\api_test"
+  "FLUTTER_ROOT=C:\\Users\\grevi\\Documents\\labb1\\flutter"
+  "FLUTTER_EPHEMERAL_DIR=C:\\Users\\grevi\\Documents\\imat\\GG\\api_test\\windows\\flutter\\ephemeral"
+  "PROJECT_DIR=C:\\Users\\grevi\\Documents\\imat\\GG\\api_test"
+  "FLUTTER_TARGET=C:\\Users\\grevi\\Documents\\imat\\GG\\api_test\\lib\\main.dart"
   "DART_OBFUSCATION=false"
   "TRACK_WIDGET_CREATION=true"
   "TREE_SHAKE_ICONS=false"
-  "PACKAGE_CONFIG=C:\\Users\\ellal\\Documents\\granssnitt\\api_test\\.dart_tool\\package_config.json"
+  "PACKAGE_CONFIG=C:\\Users\\grevi\\Documents\\imat\\GG\\api_test\\.dart_tool\\package_config.json"
 )

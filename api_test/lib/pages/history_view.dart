@@ -4,6 +4,7 @@ import 'package:api_test/model/imat_data_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:api_test/widgets/app_navigation_bar.dart';
 
 // Stateful eftersom man behöver komma ihåg vilken order som är vald
 // När den valda ordern ändras så ritas gränssnittet om pga
@@ -25,14 +26,11 @@ class _HistoryViewState extends State<HistoryView> {
     var iMat = Provider.of<ImatDataHandler>(context, listen: false);
 
     // Hämta datan som ska visas
-    var orders = iMat.orders;
-
-    return Scaffold(
+    var orders = iMat.orders;    return Scaffold(
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(height: AppTheme.paddingLarge),
-          _header(context),
+          const AppNavigationBar(),
           Expanded(
             child: Row(
               children: [
@@ -57,27 +55,6 @@ class _HistoryViewState extends State<HistoryView> {
       ),
     );
   }
-
-  Widget _header(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        ElevatedButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: Text('iMat'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: Text('Tillbaka'),
-        ),
-      ],
-    );
-  }
-
   Widget _ordersList(BuildContext context, List<Order> orders, Function onTap) {
     return ListView(
       children: [for (final order in orders) _orderInfo(order, onTap)],

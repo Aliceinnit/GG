@@ -1,67 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:api_test/widgets/app_navigation_bar.dart';
 
 class AccountView extends StatelessWidget {
   const AccountView({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF0F5), 
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context),
-            const SizedBox(height: 24),
-            _buildFormCard(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      color: const Color(0xFFD7F5D2), 
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Column(
         children: [
-          TextButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/'); // eller din startsidas route
-            },
-            child: const Text(
-              'iMat',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF3A2C4B),
-              ),
-      ),
-    ),
-          Row(
-            children: [
-              TextButton(
-                onPressed: () {},
-                child: const Text('Fortsätt handla'),
-              ),
-              const SizedBox(width: 16),
-              TextButton(
-                onPressed: () {},
-                child: const Text('Varukorg'),
-              ),
-              const SizedBox(width: 8),
-              TextButton(
-                onPressed: () {},
-                child: const Text('Mina sidor'),
-              ),
-            ],
+          const AppNavigationBar(),
+          const SizedBox(height: 24),
+          Expanded(
+            child: SingleChildScrollView(
+              child: _buildFormCard(context),
+            ),
           ),
         ],
       ),
     );
   }
-
   Widget _buildFormCard(BuildContext context) {
     return Center(
       child: Container(

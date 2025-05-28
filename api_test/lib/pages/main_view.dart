@@ -4,14 +4,13 @@ import 'package:api_test/app_theme.dart';
 import 'package:api_test/model/imat/product.dart';
 import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/pages/account_view.dart';
-import 'package:api_test/pages/history_view.dart';
+import 'package:api_test/pages/checkout_flow.dart';
 import 'package:api_test/widgets/cart_view.dart';
 import 'package:api_test/widgets/product_tile.dart';
+import 'package:api_test/widgets/app_navigation_bar.dart';
 
 class MainView extends StatelessWidget {
-  const MainView({super.key});
-
-  @override
+  const MainView({super.key});  @override
   Widget build(BuildContext context) {
     var iMat = context.watch<ImatDataHandler>();
     var products = iMat.selectProducts;
@@ -20,8 +19,25 @@ class MainView extends StatelessWidget {
       backgroundColor: const Color(0xFFFCEEF4), // Ljus bakgrund
       body: Column(
         children: [
-          const SizedBox(height: AppTheme.paddingLarge),
-          _header(context, iMat),
+          // Use the new navigation bar
+          AppNavigationBar(
+            onSearch: (query) {
+              // Implement search functionality using findProducts method
+              if (query.isNotEmpty) {
+                final searchResults = iMat.findProducts(query);
+                iMat.selectSelection(searchResults);
+              } else {
+                iMat.selectAllProducts();
+              }
+            },
+            onCartPressed: () {
+              // You can implement cart modal or navigation here
+              _showCartModal(context, iMat);
+            },
+            onAccountPressed: () {
+              _showAccount(context);
+            },
+          ),
           const SizedBox(height: AppTheme.paddingMedium),
           Expanded(
             child: Row(
@@ -29,7 +45,7 @@ class MainView extends StatelessWidget {
               children: [
                 _leftPanel(iMat),
                 Expanded(child: _centerStage(context, products)),
-                _shoppingCart(iMat),
+                _shoppingCart(context, iMat),
               ],
             ),
           ),
@@ -37,58 +53,84 @@ class MainView extends StatelessWidget {
       ),
     );
   }
-
-  Widget _header(BuildContext context, ImatDataHandler iMat) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingMedium),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // iMat-logotyp
-          const Text(
-            "iMat",
-            style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+  void _showCartModal(BuildContext context, ImatDataHandler iMat) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
-
-          // Sökfält
-          SizedBox(
-            width: 300,
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: "Sök varor",
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFD2EBD8),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Kundvagn',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF2E7D32),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
               ),
             ),
-          ),
-
-          // Ikoner till höger
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.list),
-                tooltip: 'Mina inköp',
-                onPressed: () => _showHistory(context),
+            const Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: CartView(),
               ),
-              IconButton(
-                icon: const Icon(Icons.favorite_border),
-                tooltip: 'Favoriter',
-                onPressed: () => iMat.selectFavorites(),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CheckoutFlow()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Till kassan',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
               ),
-              IconButton(
-                icon: const Icon(Icons.shopping_bag_outlined),
-                tooltip: 'Varukorg',
-                onPressed: () {}, // valfri
-              ),
-              IconButton(
-                icon: const Icon(Icons.person_outline),
-                tooltip: 'Logga in',
-                onPressed: () => _showAccount(context),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -155,7 +197,7 @@ class MainView extends StatelessWidget {
     );
   }
 
-  Widget _shoppingCart(ImatDataHandler iMat) {
+  Widget _shoppingCart(BuildContext context, ImatDataHandler iMat) {
     return Container(
       width: 280,
       padding: const EdgeInsets.all(16),
@@ -166,29 +208,31 @@ class MainView extends StatelessWidget {
           const Text('Kundvagn', style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           SizedBox(height: 500, child: CartView()),
-          const SizedBox(height: 12),
-          ElevatedButton(
+          const SizedBox(height: 12),          ElevatedButton(
             onPressed: () {
-              iMat.placeOrder();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CheckoutFlow()),
+              );
             },
-            child: const Text('Köp!'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Till kassan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
     );
   }
-
   void _showAccount(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AccountView()),
-    );
-  }
-
-  void _showHistory(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const HistoryView()),
     );
   }
 }
