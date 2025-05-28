@@ -23,6 +23,7 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
   bool _showCartOverlay = false;
   late AnimationController _animationController;
   late Animation<Offset> _cartSlideAnimation;
+  late Animation<Offset> _sidebarSlideAnimation;
 
   @override
   void initState() {
@@ -32,6 +33,13 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
       vsync: this,
     );
     _cartSlideAnimation = Tween<Offset>(
+      begin: const Offset(1.0, 0.0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    ));
+    _sidebarSlideAnimation = Tween<Offset>(
       begin: const Offset(1.0, 0.0),
       end: Offset.zero,
     ).animate(CurvedAnimation(
@@ -49,16 +57,16 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     var iMat = context.watch<ImatDataHandler>();
-    var products = iMat.selectProducts;    return Scaffold(
+    var products = iMat.selectProducts;
+
+    return Scaffold(
       backgroundColor: AppTheme.background,
       body: Stack(
         children: [
           Column(
             children: [
-              // Use the new navigation bar
               AppNavigationBar(
                 onSearch: (query) {
-                  // Implement search functionality using findProducts method
                   if (query.isNotEmpty) {
                     final searchResults = iMat.findProducts(query);
                     iMat.selectSelection(searchResults);
@@ -67,11 +75,12 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                   }
                 },
                 onCartPressed: () {
-                  // You can implement cart modal or navigation here
-                  _showCartModal(context, iMat);
+                  setState(() => _showCartOverlay = true);
+                  _animationController.forward();
                 },
                 onAccountPressed: () {
-                  _showAccount(context);
+                  setState(() => _showSidebar = true);
+                  _animationController.forward();
                 },
               ),
               Expanded(
@@ -80,7 +89,6 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                   children: [
                     _leftPanel(iMat),
                     Expanded(child: _centerStage(context, products)),
-                    _shoppingCart(context, iMat),
                   ],
                 ),
               ),
@@ -108,70 +116,73 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
 
           if (_showSidebar)
             Positioned(
-              top: 120,
+              top: 64,
               right: 0,
-              child: Container(
-                width: 250,
-                height: MediaQuery.of(context).size.height - 120,
-                color: const Color(0xffd2ebd8),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => setState(() => _showSidebar = false),
-                      ),
-                    ),
-                    const Text("Mina sidor", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 20),
-                    ListTile(
-                      leading: const Icon(Icons.favorite),
-                      title: const Text("Favoriter"),
-                      onTap: () {
-                        setState(() => _showSidebar = false);
-                        iMat.selectFavorites();
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.history),
-                      title: const Text("Tidigare inköp"),
-                      onTap: () {
-                        setState(() => _showSidebar = false);
-                        _showHistory(context);
-                      },
-                    ),
-                    const Spacer(),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3A2C4B), // Mörklila
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+              child: SlideTransition(
+                position: _sidebarSlideAnimation,
+                child: Container(
+                  width: 280,
+                  height: MediaQuery.of(context).size.height - 64,
+                  color: const Color(0xffd2ebd8),
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => setState(() => _showSidebar = false),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),
-                      onPressed: () => _showAccount(context),
-                      child: const Text(
-                        'Logga in',
-                        style: TextStyle(color: Color(0xFFFCEEF4)), // Ljusrosa
+                      const Text("Mina sidor", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 20),
+                      ListTile(
+                        leading: const Icon(Icons.favorite),
+                        title: const Text("Favoriter"),
+                        onTap: () {
+                          setState(() => _showSidebar = false);
+                          iMat.selectFavorites();
+                        },
                       ),
-                    ),
-                  ],
+                      ListTile(
+                        leading: const Icon(Icons.history),
+                        title: const Text("Tidigare inköp"),
+                        onTap: () {
+                          setState(() => _showSidebar = false);
+                          _showHistory(context);
+                        },
+                      ),
+                      const Spacer(),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF3A2C4B),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        ),
+                        onPressed: () => _showAccount(context),
+                        child: const Text(
+                          'Logga in',
+                          style: TextStyle(color: Color(0xFFFCEEF4)),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
 
           if (_showCartOverlay)
             Positioned(
-              top: 120,
+              top: 64,
               right: 0,
               child: SlideTransition(
                 position: _cartSlideAnimation,
                 child: Container(
                   width: 320,
-                  height: MediaQuery.of(context).size.height - 120,
+                  height: MediaQuery.of(context).size.height - 64,
                   color: const Color(0xffd2ebd8),
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -190,13 +201,24 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                       ),
                       const Text('Kundvagn', style: TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 12),
-                      Expanded(child: CartView()),
+                      const Expanded(child: CartView()),
                       const SizedBox(height: 12),
                       ElevatedButton(
                         onPressed: () {
-                          iMat.placeOrder();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const CheckoutFlow()),
+                          );
                         },
-                        child: const Text('Köp!'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.deepPurple,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Till kassan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                       ),
                     ],
                   ),
@@ -207,85 +229,18 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
       ),
     );
   }
-  void _showCartModal(BuildContext context, ImatDataHandler iMat) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFD2EBD8),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Kundvagn',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2E7D32),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-            ),
-            const Expanded(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: CartView(),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const CheckoutFlow()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Till kassan',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+
+  void _showAccount(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AccountView()),
+    );
+  }
+
+  void _showHistory(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HistoryView()),
     );
   }
 
@@ -349,47 +304,6 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
   }
 
   Widget _shoppingCart(BuildContext context, ImatDataHandler iMat) {
-    return Container(
-      width: 280,
-      padding: const EdgeInsets.all(16),
-      color: const Color(0xFFFAF7F9),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Kundvagn', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
-          SizedBox(height: 500, child: CartView()),
-          const SizedBox(height: 12),          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CheckoutFlow()),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Till kassan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
-  }  void _showAccount(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AccountView()),
-    );
-  }
-
-  void _showHistory(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const HistoryView()),
-    );
+    return const SizedBox.shrink();
   }
 }
