@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'package:api_test/widgets/hover_list_tile.dart';
+import 'package:api_test/widgets/left_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:api_test/app_theme.dart';
@@ -88,7 +88,7 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _leftPanel(iMat),
+                    LeftPanel(),
                     Expanded(child: _centerStage(context, products)),
                   ],
                 ),
@@ -242,57 +242,6 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const HistoryView()),
-    );
-  }
-
-  Widget _leftPanel(ImatDataHandler iMat) {
-    final Map<String, List<String>> categories = {
-      'Erbjudanden': ['Visa alla', 'Rabattvaror', 'Veckans kampanj'],
-      'Kött, fågel': ['Visa alla', 'Nötkött', 'Kyckling', 'Fläskkött', 'Pålägg', 'Korv', 'Chark'],
-      'Frukt och grönt': ['Visa alla', 'Frukt', 'Bär', 'Grönsaker', 'Rotfrukter', 'Ekologiskt'],
-      'Mejeri': ['Visa alla', 'Mjölk & grädde', 'Yoghurt', 'Ost', 'Smör & margarin', 'Ägg'],
-      'Bröd och kaffebröd': ['Visa alla', 'Matbröd', 'Frallor', 'Kakor', 'Fikabröd'],
-      'Skafferi': ['Visa alla', 'Pasta & ris', 'Konserver', 'Kryddor', 'Bakprodukter'],
-      'Fryst': ['Visa alla', 'Frysta grönsaker', 'Glass', 'Pizza', 'Bär', 'Färdigmat fryst'],
-      'Fisk och skaldjur': ['Visa alla', 'Färsk fisk', 'Fryst fisk', 'Skaldjur', 'Inlagd fisk'],
-      'Färdigmat': ['Visa alla', 'Sallader', 'Färdiga rätter', 'Soppor', 'Smörgåsar'],
-      'Vegetarisk': ['Visa alla', 'Vegokött', 'Veganska produkter', 'Vegetariska rätter'],
-      'Godis, snacks': ['Visa alla', 'Godis', 'Chips', 'Choklad', 'Nötter'],
-      'Dryck': ['Visa alla', 'Läsk', 'Juice', 'Kaffe & te', 'Energidryck', 'Vatten'],
-      'Blommor': ['Visa alla', 'Snittblommor', 'Krukväxter', 'Buketter'],
-    };
-
-    return Container(
-      width: 220,
-      color: const Color(0xfffae8ed),
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Kategorier', style: AppTheme.headingMedium),
-          const SizedBox(height: 12),
-          Expanded(
-            child: ListView(
-              children: categories.entries.map((entry) {
-                final categoryName = entry.key;
-                final subcategories = entry.value;
-
-                return ExpansionTile(
-                  title: Text(categoryName),
-                  children: subcategories.map((subcategory) {
-                    return HoverListTile(
-                      title: subcategory,
-                      onTap: () {
-                        print('Vald underkategori: $subcategory');
-                      },
-                    );
-                  }).toList(),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
     );
   }
 

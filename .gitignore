@@ -79,6 +79,7 @@ lib/generated_plugin_registrant.dart
 **/windows/flutter/generated_plugin_registrant.cc
 **/windows/flutter/generated_plugin_registrant.h
 **/windows/flutter/generated_plugins.cmake
+**/windows/flutter/ephemeral/
 
 # Linux related
 **/linux/flutter/generated_plugin_registrant.cc
@@ -207,3 +208,8 @@ api_test/.dart_tool/chrome-device/Default/Sync Data/LevelDB/LOG
 api_test/.dart_tool/chrome-device/Default/Sync Data/LevelDB/LOG.old
 api_test/.dart_tool/chrome-device/Default/WebStorage/QuotaManager
 api_test/build/cache.dill.track.dill
+api_test/windows/flutter/ephemeral/flutter_windows.dll
+api_test/windows/flutter/ephemeral/flutter_windows.dll.exp
+api_test/windows/flutter/ephemeral/flutter_windows.dll.lib
+api_test/windows/flutter/ephemeral/flutter_windows.dll.pdb
+api_test/windows/flutter/ephemeral/flutter_windows.h
