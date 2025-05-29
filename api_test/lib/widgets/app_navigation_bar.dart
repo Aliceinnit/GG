@@ -80,8 +80,11 @@ class _AppNavigationBarState extends State<AppNavigationBar> {
       onExit: (_) {
         _logoHoverState.setHovered(false);
       },
-      child: GestureDetector(
-        onTap: () {
+      child: GestureDetector(        onTap: () {
+          // Reset to show all products
+          final iMat = Provider.of<ImatDataHandler>(context, listen: false);
+          iMat.selectAllProducts();
+          
           // Check if we're already on MainView by checking the widget tree
           bool isOnMainView = false;
           context.visitAncestorElements((element) {
