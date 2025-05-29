@@ -30,7 +30,7 @@ class _HistoryViewState extends State<HistoryView> {
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const AppNavigationBar(),
+          const AppNavigationBar(showSearchBar: false),
           Expanded(
             child: Row(
               children: [

@@ -21,12 +21,14 @@ class AppNavigationBar extends StatefulWidget {
   final Function(String)? onSearch;
   final VoidCallback? onCartPressed;
   final VoidCallback? onAccountPressed;
+  final bool showSearchBar;
   
   const AppNavigationBar({
     super.key,
     this.onSearch,
     this.onCartPressed,
     this.onAccountPressed,
+    this.showSearchBar = true,
   });
 
   @override
@@ -50,20 +52,21 @@ class _AppNavigationBarState extends State<AppNavigationBar> {
       padding: EdgeInsets.symmetric(
         horizontal: AppTheme.paddingMedium, 
         vertical: AppTheme.paddingMedium,
-      ),
-      child: Row(
+      ),      child: Row(
       children: [
         // Logo on the left
         _buildLogo(context),
         
-        // Expanded to center the search bar
+        // Conditionally show search bar or spacer
         Expanded(
-        child: Center(
-          child: SizedBox(
-          width: 800,
-          child: _buildSearchBar(),
-          ),
-        ),
+        child: widget.showSearchBar 
+          ? Center(
+              child: SizedBox(
+                width: 800,
+                child: _buildSearchBar(),
+              ),
+            )
+          : const SizedBox(), // Empty spacer when search bar is hidden
         ),
         
         // Icons on the right

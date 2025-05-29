@@ -7,10 +7,9 @@ class AccountView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF0F5), 
-      body: Column(
+      backgroundColor: const Color(0xFFFFF0F5),      body: Column(
         children: [
-          const AppNavigationBar(),
+          const AppNavigationBar(showSearchBar: false),
           const SizedBox(height: 24),
           Expanded(
             child: SingleChildScrollView(
