@@ -46,10 +46,9 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
       parent: _controller,
       curve: Curves.easeInOut,
     ));
-    
-    _scaleAnimation = Tween<double>(
+      _scaleAnimation = Tween<double>(
       begin: 1.0,
-      end: 1.05,
+      end: 1.015,
     ).animate(CurvedAnimation(
       parent: _hoverController,
       curve: Curves.easeInOut,
@@ -192,89 +191,130 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
         );
       },
     );
-  }
-
-  Widget _buildFrontCard(ImatDataHandler iMat, bool isInCart, ShoppingItem? cartItem, int quantity) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [        // Product Image with shimmer effect
-        Expanded(
-          flex: 3,
-          child: Container(
-            padding: const EdgeInsets.all(AppTheme.paddingMedium),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: iMat.getImage(widget.product) ?? Container(
-                      color: Colors.grey[100],
-                      child: Icon(
-                        Icons.shopping_bag_outlined,
-                        size: 40,
-                        color: Colors.grey[400],
-                      ),                    ),
+  }  Widget _buildFrontCard(ImatDataHandler iMat, bool isInCart, ShoppingItem? cartItem, int quantity) {
+    final isFavorite = iMat.isFavorite(widget.product);
+    
+    return Stack(
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Product Image with shimmer effect
+            Expanded(
+              flex: 3,
+              child: Container(
+                padding: const EdgeInsets.all(AppTheme.paddingMedium),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: iMat.getImage(widget.product) ?? Container(
+                          color: Colors.grey[100],
+                          child: Icon(
+                            Icons.shopping_bag_outlined,
+                            size: 40,
+                            color: Colors.grey[400],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
-        
-        // Product Info
-        Expanded(
-          flex: 2,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppTheme.paddingMedium,
-              0,
-              AppTheme.paddingMedium,
-              AppTheme.paddingMedium,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Product Name
-                Expanded(
-                  child: Text(
-                    widget.product.name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),                ),
-                
-                // Price and Add to Cart Button or Quantity Controls
-                Row(
+            
+            // Product Info
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppTheme.paddingMedium,
+                  0,
+                  AppTheme.paddingMedium,
+                  AppTheme.paddingMedium,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Price
-                    Text(
-                      '${widget.product.price.toStringAsFixed(2)} ${widget.product.unit}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.primaryPurple,
+                    // Product Name
+                    Expanded(
+                      child: Text(
+                        widget.product.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textPrimary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     
-                    // Add to Cart Button or Quantity Controls
-                    if (!isInCart)
-                      _buildAddButton(iMat)
-                    else
-                      _buildQuantityControls(iMat, cartItem!, quantity),
+                    // Price and Add to Cart Button or Quantity Controls
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Price
+                        Text(
+                          '${widget.product.price.toStringAsFixed(2)} ${widget.product.unit}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.primaryPurple,
+                          ),
+                        ),
+                        
+                        // Add to Cart Button or Quantity Controls
+                        if (!isInCart)
+                          _buildAddButton(iMat)
+                        else
+                          _buildQuantityControls(iMat, cartItem!, quantity),
+                      ],
+                    ),
                   ],
                 ),
-              ],
+              ),
+            ),
+          ],
+        ),
+          // Heart button for favorites
+        Positioned(
+          top: 8,
+          right: 8,
+          child: GestureDetector(
+            onTap: () {
+              iMat.toggleFavorite(widget.product);
+            },
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.95),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: isFavorite ? AppTheme.primaryPurple.withOpacity(0.3) : AppTheme.border,
+                  width: 1,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: isFavorite ? AppTheme.primaryPurple : AppTheme.textSecondary,
+                size: 20,
+              ),
             ),
           ),
         ),
