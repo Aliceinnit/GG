@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'package:api_test/widgets/categories/hover_list_tile.dart';
+import 'package:api_test/widgets/hover_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:api_test/app_theme.dart';
