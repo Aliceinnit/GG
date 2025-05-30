@@ -6,10 +6,9 @@ import 'package:api_test/app_theme.dart';
 import 'package:api_test/model/imat/product.dart';
 import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/pages/account_view.dart';
-import 'package:api_test/pages/checkout_flow.dart';
 import 'package:api_test/pages/history_view.dart';
 import 'package:api_test/pages/favorites_view.dart';
-import 'package:api_test/widgets/cart_view.dart';
+import 'package:api_test/widgets/cart_sidebar.dart';
 import 'package:api_test/widgets/product_tile.dart';
 import 'package:api_test/widgets/app_navigation_bar.dart';
 
@@ -114,9 +113,7 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-            ),
-
-          if (_showSidebar)
+            ),          if (_showSidebar)
             Positioned(
               top: 64,
               right: 0,
@@ -125,23 +122,23 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                 child: Container(
                   width: 280,
                   height: MediaQuery.of(context).size.height - 64,
-                  color: const Color(0xffd2ebd8),
-                  padding: const EdgeInsets.all(16),
+                  color: AppTheme.headerGreen,
+                  padding: const EdgeInsets.all(AppTheme.paddingMedium),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Align(
                         alignment: Alignment.topRight,
                         child: IconButton(
-                          icon: const Icon(Icons.close),
+                          icon: Icon(Icons.close, color: AppTheme.primaryPurple),
                           onPressed: () => setState(() => _showSidebar = false),
                         ),
                       ),
-                      const Text("Mina sidor", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 20),
+                      Text("Mina sidor", style: AppTheme.headingMedium),
+                      const SizedBox(height: AppTheme.paddingLarge),
                       ListTile(
-                        leading: const Icon(Icons.favorite),
-                        title: const Text("Favoriter"),
+                        leading: Icon(Icons.favorite, color: AppTheme.primaryPurple),
+                        title: Text("Favoriter", style: AppTheme.bodyLarge),
                         onTap: () {
                           setState(() => _showSidebar = false);
                           Navigator.push(
@@ -151,84 +148,33 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                         },
                       ),
                       ListTile(
-                        leading: const Icon(Icons.history),
-                        title: const Text("Tidigare inköp"),
+                        leading: Icon(Icons.history, color: AppTheme.primaryPurple),
+                        title: Text("Tidigare inköp", style: AppTheme.bodyLarge),
                         onTap: () {
                           setState(() => _showSidebar = false);
                           _showHistory(context);
                         },
                       ),
                       const Spacer(),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3A2C4B),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        ),
-                        onPressed: () => _showAccount(context),
-                        child: const Text(
-                          'Logga in',
-                          style: TextStyle(color: Color(0xFFFCEEF4)),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: AppTheme.primaryButtonStyle,
+                          onPressed: () => _showAccount(context),
+                          child: Text('Logga in', style: AppTheme.buttonTextStyle),
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
-
-          if (_showCartOverlay)
-            Positioned(
-              top: 64,
-              right: 0,
-              child: SlideTransition(
-                position: _cartSlideAnimation,
-                child: Container(
-                  width: 320,
-                  height: MediaQuery.of(context).size.height - 64,
-                  color: const Color(0xffd2ebd8),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: IconButton(
-                          icon: const Icon(Icons.close),
-                          tooltip: 'Stäng',
-                          onPressed: () {
-                            setState(() => _showCartOverlay = false);
-                            _animationController.reverse();
-                          },
-                        ),
-                      ),
-                      const Text('Kundvagn', style: TextStyle(fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 12),
-                      const Expanded(child: CartView()),
-                      const SizedBox(height: 12),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const CheckoutFlow()),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.deepPurple,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text('Till kassan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            ),          if (_showCartOverlay)
+            CartSidebar(
+              slideAnimation: _cartSlideAnimation,
+              onClose: () {
+                setState(() => _showCartOverlay = false);
+                _animationController.reverse();
+              },
             ),
         ],
       ),
