@@ -250,13 +250,31 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
   }
 
   Widget _centerStage(BuildContext context, List<Product> products) {
+    // Calculate responsive grid columns based on screen width
+    final screenWidth = MediaQuery.of(context).size.width;
+    int crossAxisCount;
+
+    if (screenWidth > 1400) {
+      crossAxisCount = 6; // Keep 6 for very wide screens (your preference)
+    } else if (screenWidth > 1200) {
+      crossAxisCount = 5;
+    } else if (screenWidth > 1000) {
+      crossAxisCount = 4;
+    } else if (screenWidth > 800) {
+      crossAxisCount = 3;
+    } else if (screenWidth > 600) {
+      crossAxisCount = 3;
+    } else {
+      crossAxisCount = 2; // Adjusted for very small screens
+    }
+
     return GridView.builder(
       padding: const EdgeInsets.all(8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 6, // Changed from 4 to 6
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.8,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount, // Use responsive crossAxisCount
+        crossAxisSpacing: 12,      // Your preferred spacing
+        mainAxisSpacing: 12,       // Your preferred spacing
+        childAspectRatio: 0.8,     // Your preferred aspect ratio
       ),
       itemCount: products.length,
       itemBuilder: (context, index) {
