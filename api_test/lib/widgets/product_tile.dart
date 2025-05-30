@@ -392,39 +392,38 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
               ),
             ),
           ],
-        ),
-        Positioned(
+        ),        Positioned(
           top: 8,
           left: 8,
           child: GestureDetector(
             onTap: () {
               iMat.toggleFavorite(widget.product);
-            },
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: isFavorite
-                      ? AppTheme.primaryPurple.withOpacity(0.3)
-                      : AppTheme.border,
-                  width: 1,
+            },            child: Icon(
+              Icons.favorite,
+              color: isFavorite ? AppTheme.primaryPurple : Colors.white,
+              size: 32,
+              shadows: [
+                Shadow(
+                  color: AppTheme.primaryPurple,
+                  blurRadius: 0,
+                  offset: Offset(1, 0),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(
-                isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? AppTheme.primaryPurple : AppTheme.textSecondary,
-                size: 20,
-              ),
+                Shadow(
+                  color: AppTheme.primaryPurple,
+                  blurRadius: 0,
+                  offset: Offset(-1, 0),
+                ),
+                Shadow(
+                  color: AppTheme.primaryPurple,
+                  blurRadius: 0,
+                  offset: Offset(0, 1),
+                ),
+                Shadow(
+                  color: AppTheme.primaryPurple,
+                  blurRadius: 0,
+                  offset: Offset(0, -1),
+                ),
+              ],
             ),
           ),
         ),

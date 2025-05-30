@@ -55,19 +55,14 @@ class CartSidebar extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Kundvagn', style: AppTheme.headingMedium),
-                  GestureDetector(
+                  Text('Kundvagn', style: AppTheme.headingMedium),                  GestureDetector(
                     onTap: onClose,
                     child: Container(
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.95),
+                        color: AppTheme.primaryPurple,
                         borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: AppTheme.primaryPurple.withOpacity(0.3),
-                          width: 1,
-                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.1),
@@ -78,7 +73,7 @@ class CartSidebar extends StatelessWidget {
                       ),
                       child: Icon(
                         Icons.close,
-                        color: AppTheme.primaryPurple,
+                        color: Colors.white,
                         size: 20,
                       ),
                     ),

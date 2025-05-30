@@ -74,10 +74,6 @@ class _SubcategoryViewState extends State<SubcategoryView> with TickerProviderSt
                   }
                   });
                 },
-                onAccountPressed: () {
-                  setState(() => _showSidebar = true);
-                  _animationController.forward();
-                },
               ),
               Expanded(
                 child: Row(

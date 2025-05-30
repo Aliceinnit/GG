@@ -6,6 +6,7 @@ import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/model/internet_handler.dart';
 import 'package:api_test/pages/main_view.dart';
 import 'package:api_test/widgets/cart_overlay_provider.dart';
+import 'package:api_test/widgets/account_overlay_provider.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
@@ -17,6 +18,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (context) => ImatDataHandler()),
         ChangeNotifierProvider(create: (context) => CartOverlayProvider()),
+        ChangeNotifierProvider(create: (context) => AccountOverlayProvider()),
       ],
       child: const MyApp(),
     ),
@@ -64,11 +66,12 @@ class MyApp extends StatelessWidget {
             textStyle: const TextStyle(decoration: TextDecoration.none),
           ),
         ),
-      ),      debugShowCheckedModeBanner: false,
-      builder: (context, child) {
+      ),      debugShowCheckedModeBanner: false,      builder: (context, child) {
         return Material(
-          child: CartOverlayWrapper(
-            child: child ?? const MainView(),
+          child: AccountOverlayWrapper(
+            child: CartOverlayWrapper(
+              child: child ?? const MainView(),
+            ),
           ),
         );
       },

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:api_test/model/imat_data_handler.dart';
-import 'package:api_test/pages/account_view.dart';
 import 'package:api_test/pages/main_view.dart';
 import 'package:api_test/app_theme.dart';
 import 'package:api_test/widgets/cart_overlay_provider.dart';
+import 'package:api_test/widgets/account_overlay_provider.dart';
+import 'package:api_test/widgets/account_icon_widget.dart';
 
 // Global state for logo hover to persist across navigation
 class LogoHoverState extends ChangeNotifier {
@@ -21,7 +22,6 @@ class LogoHoverState extends ChangeNotifier {
 class AppNavigationBar extends StatefulWidget {
   final Function(String)? onSearch;
   final VoidCallback? onCartPressed;
-  final VoidCallback? onAccountPressed;
   final bool showSearchBar;
   final String? pageTitle; // Added pageTitle parameter
   
@@ -29,7 +29,6 @@ class AppNavigationBar extends StatefulWidget {
     super.key,
     this.onSearch,
     this.onCartPressed,
-    this.onAccountPressed,
     this.showSearchBar = true,
     this.pageTitle, // Added to constructor
   });
@@ -215,12 +214,15 @@ class _AppNavigationBarState extends State<AppNavigationBar> {
         ),
       ),
     );
-  }
-  Widget _buildRightIcons(BuildContext context) {
+  }  Widget _buildRightIcons(BuildContext context) {
     return Row(
-      children: [
-        // Account icon
-        _buildAccountIcon(context),
+      children: [        // Account icon
+        AccountIconWidget(
+          onPressed: () {
+            final accountProvider = Provider.of<AccountOverlayProvider>(context, listen: false);
+            accountProvider.showAccount();
+          },
+        ),
         
         const SizedBox(width: AppTheme.paddingMedium),
         
@@ -236,26 +238,26 @@ class _AppNavigationBarState extends State<AppNavigationBar> {
         final cartItemCount = iMat.getShoppingCart().items.length;
         
         return Stack(
-          children: [
-            Column(
+          children: [            Column(
               mainAxisSize: MainAxisSize.min,
-              children: [                IconButton(
-                  onPressed: () {
+              children: [
+                GestureDetector(
+                  onTap: () {
                     final cartProvider = Provider.of<CartOverlayProvider>(context, listen: false);
                     cartProvider.showCart();
                   },
-                  icon: Icon(
+                  child: Icon(
                     Icons.shopping_bag_outlined,
                     color: AppTheme.primaryPurple,
-                    size: 32,
+                    size: 40,
                   ),
-                  tooltip: 'Varukorg',
                 ),
+                const SizedBox(height: 2),
                 Text(
                   'Varukorg',
                   style: TextStyle(
                     color: AppTheme.primaryPurple,
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -267,7 +269,7 @@ class _AppNavigationBarState extends State<AppNavigationBar> {
                 top: 8,
                 child: Container(
                   padding: const EdgeInsets.all(4),                  decoration: BoxDecoration(
-                    color: AppTheme.error,
+                    color: AppTheme.primaryPurple,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   constraints: const BoxConstraints(
@@ -287,34 +289,5 @@ class _AppNavigationBarState extends State<AppNavigationBar> {
           ],
         );
       },
-    );
-  }
-  Widget _buildAccountIcon(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          onPressed: widget.onAccountPressed ?? () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const AccountView()),
-            );
-          },
-          icon: Icon(
-            Icons.person_outline,
-            color: AppTheme.primaryPurple,
-            size: 32,
-          ),
-          tooltip: 'Mina sidor',
-        ),        Text(
-          'Mina sidor',
-          style: TextStyle(
-            color: AppTheme.primaryPurple,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
+    );  }
 }

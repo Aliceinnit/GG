@@ -170,16 +170,11 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
       body: Stack( // Changed Column to Stack to allow overlays
         children: [
           Column(
-            children: [
-              AppNavigationBar( // Added AppNavigationBar back
+            children: [              AppNavigationBar( // Added AppNavigationBar back
                 showSearchBar: false,
                 pageTitle: "Favoriter",
                 onCartPressed: () { // Added
                   setState(() => _showCartOverlay = true);
-                  _animationController.forward();
-                },
-                onAccountPressed: () { // Added
-                  setState(() => _showSidebar = true);
                   _animationController.forward();
                 },
               ),

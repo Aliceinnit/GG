@@ -63,10 +63,6 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                     iMat.selectAllProducts();
                   }
                 },
-                onAccountPressed: () {
-                  setState(() => _showSidebar = true);
-                  _animationController.forward();
-                },
               ),
               Expanded(
                 child: Row(
