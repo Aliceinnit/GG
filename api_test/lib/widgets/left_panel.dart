@@ -18,7 +18,7 @@ class LeftPanel extends StatelessWidget {
       'Kött, fågel': ['Visa alla', 'Nötkött', 'Kyckling', 'Fläskkött', 'Pålägg', 'Korv', 'Chark'],
       'Frukt och grönt': ['Visa alla', 'Frukt', 'Bär', 'Grönsaker', 'Rotfrukter', 'Ekologiskt'],
       'Mejeri': ['Visa alla', 'Mjölk & grädde', 'Yoghurt', 'Ost', 'Smör & margarin', 'Ägg'],
-      'Bröd och kaffebröd': ['Visa alla', 'Matbröd', 'Frallor', 'Kakor', 'Fikabröd'],
+      'Bröd och kakor': ['Visa alla', 'Matbröd', 'Frallor', 'Kakor', 'Fikabröd'],
       'Skafferi': ['Visa alla', 'Pasta & ris', 'Konserver', 'Kryddor', 'Bakprodukter'],
       'Fryst': ['Visa alla', 'Frysta grönsaker', 'Glass', 'Pizza', 'Bär', 'Färdigmat fryst'],
       'Fisk och skaldjur': ['Visa alla', 'Färsk fisk', 'Fryst fisk', 'Skaldjur', 'Inlagd fisk'],
@@ -115,6 +115,8 @@ class LeftPanel extends StatelessWidget {
                             MaterialPageRoute(
                               builder: (context) => SubcategoryView(
                                 category: selectedCategory,
+                                headcategory: categoryName,
+                                subcategoryName: subcategory,
                                 products: products,
                               ),
                             ),

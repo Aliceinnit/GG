@@ -65,7 +65,7 @@ class AppTheme {
   static const TextStyle headingMedium = TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.w600,
-    color: textPrimary,
+    color: Color(0xFF3E2A5E),
   );
 
   static const TextStyle bodyLarge = TextStyle(

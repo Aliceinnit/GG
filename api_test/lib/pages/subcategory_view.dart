@@ -6,6 +6,7 @@ import 'package:api_test/pages/account_view.dart';
 import 'package:api_test/pages/checkout_flow.dart';
 import 'package:api_test/pages/history_view.dart';
 import 'package:api_test/widgets/app_navigation_bar.dart';
+import 'package:api_test/widgets/breadcrumbs.dart';
 import 'package:api_test/widgets/cart_view.dart';
 import 'package:api_test/widgets/left_panel.dart';
 import 'package:api_test/widgets/product_tile.dart';
@@ -14,11 +15,15 @@ import 'package:provider/provider.dart';
 
 class SubcategoryView extends StatefulWidget {
   final ProductCategory category;
+  final String headcategory;
+  final String subcategoryName;
   final List<Product> products;
 
   const SubcategoryView({
     super.key,
     required this.category,
+    required this.headcategory,
+    required this.subcategoryName,
     required this.products,
   });
 
@@ -142,18 +147,26 @@ class _SubcategoryViewState extends State<SubcategoryView> with TickerProviderSt
   }
 
   Widget _centerStage(BuildContext context, List<Product> products) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.8,
-      ),
-      itemCount: products.length,
-      itemBuilder: (context, index) {
-        return ProductTile(products[index]);
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Breadcrumbs(selectedCategory: widget.category, headcategory: widget.headcategory, subcategory: widget.subcategoryName),
+        Expanded(
+          child: GridView.builder(
+            padding: const EdgeInsets.all(8),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.8,
+            ),
+            itemCount: products.length,
+            itemBuilder: (context, index) {
+              return ProductTile(products[index]);
+            },
+          ),
+        ),
+      ],
     );
   }
 
