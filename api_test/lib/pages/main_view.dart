@@ -8,6 +8,7 @@ import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/pages/account_view.dart';
 import 'package:api_test/pages/checkout_flow.dart';
 import 'package:api_test/pages/history_view.dart';
+import 'package:api_test/pages/favorites_view.dart';
 import 'package:api_test/widgets/cart_view.dart';
 import 'package:api_test/widgets/product_tile.dart';
 import 'package:api_test/widgets/app_navigation_bar.dart';
@@ -143,7 +144,10 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                         title: const Text("Favoriter"),
                         onTap: () {
                           setState(() => _showSidebar = false);
-                          iMat.selectFavorites();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const FavoritesView()),
+                          );
                         },
                       ),
                       ListTile(
@@ -249,7 +253,7 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
     return GridView.builder(
       padding: const EdgeInsets.all(8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
+        crossAxisCount: 6, // Changed from 4 to 6
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
         childAspectRatio: 0.8,
@@ -259,9 +263,5 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
         return ProductTile(products[index]);
       },
     );
-  }
-
-  Widget _shoppingCart(BuildContext context, ImatDataHandler iMat) {
-    return const SizedBox.shrink();
   }
 }

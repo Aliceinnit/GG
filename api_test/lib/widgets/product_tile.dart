@@ -287,7 +287,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
           // Heart button for favorites
         Positioned(
           top: 8,
-          right: 8,
+          left: 8, // Changed from right: 8 to left: 8
           child: GestureDetector(
             onTap: () {
               iMat.toggleFavorite(widget.product);

@@ -155,7 +155,7 @@ class _SubcategoryViewState extends State<SubcategoryView> with TickerProviderSt
           child: GridView.builder(
             padding: const EdgeInsets.all(8),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
+              crossAxisCount: 6, // Changed from 4 to 6
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
               childAspectRatio: 0.8,

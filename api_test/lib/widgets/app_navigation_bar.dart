@@ -22,6 +22,7 @@ class AppNavigationBar extends StatefulWidget {
   final VoidCallback? onCartPressed;
   final VoidCallback? onAccountPressed;
   final bool showSearchBar;
+  final String? pageTitle; // Added pageTitle parameter
   
   const AppNavigationBar({
     super.key,
@@ -29,6 +30,7 @@ class AppNavigationBar extends StatefulWidget {
     this.onCartPressed,
     this.onAccountPressed,
     this.showSearchBar = true,
+    this.pageTitle, // Added to constructor
   });
 
   @override
@@ -66,7 +68,18 @@ class _AppNavigationBarState extends State<AppNavigationBar> {
                 child: _buildSearchBar(),
               ),
             )
-          : const SizedBox(), // Empty spacer when search bar is hidden
+          : widget.pageTitle != null // Check if pageTitle is provided
+            ? Center(
+                child: Text( // Display the pageTitle
+                  widget.pageTitle!,
+                  style: TextStyle(
+                    fontSize: 24, // Adjust size as needed
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primaryPurple,
+                  ),
+                ),
+              )
+            : const SizedBox(), // Empty spacer if no search bar and no title
         ),
         
         // Icons on the right
