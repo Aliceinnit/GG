@@ -5,6 +5,75 @@ import 'package:api_test/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+class _AnimatedProductTileButton extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+  final BorderRadiusGeometry borderRadius;
+  final String? tooltip;
+
+  const _AnimatedProductTileButton({
+    required this.icon,
+    required this.onPressed,
+    this.borderRadius = const BorderRadius.all(Radius.circular(8)),
+    this.tooltip,
+  });
+
+  @override
+  _AnimatedProductTileButtonState createState() => _AnimatedProductTileButtonState();
+}
+
+class _AnimatedProductTileButtonState extends State<_AnimatedProductTileButton> {
+  bool _isPressed = false;
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final double scale = _isPressed ? 1.2 : (_isHovered ? 1.05 : 1.0);
+    final Color bgColor = _isHovered ? AppTheme.primaryPurple.withOpacity(0.85) : AppTheme.primaryPurple;
+
+    Widget buttonContent = Transform.scale(
+      scale: scale,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: widget.borderRadius,
+          boxShadow: _isHovered || _isPressed ? [
+            BoxShadow(
+              color: AppTheme.primaryPurple.withOpacity(0.3),
+              blurRadius: 5,
+              spreadRadius: 1,
+            )
+          ] : [],
+        ),
+        child: Icon(
+          widget.icon,
+          color: AppTheme.buttonText,
+          size: 18,
+        ),
+      ),
+    );
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _isPressed = true),
+        onTapUp: (_) {
+          setState(() => _isPressed = false);
+          widget.onPressed();
+        },
+        onTapCancel: () => setState(() => _isPressed = false),
+        child: widget.tooltip != null
+            ? Tooltip(message: widget.tooltip!, child: buttonContent)
+            : buttonContent,
+      ),
+    );
+  }
+}
+
 class ProductTile extends StatefulWidget {
   const ProductTile(this.product, {super.key});
 
@@ -23,7 +92,9 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
   late Animation<double> _elevationAnimation;
   late Animation<Color?> _borderColorAnimation;
   bool _isFlipped = false;
-  bool _isHovered = false;  @override
+  bool _isHovered = false;
+
+  @override
   void initState() {
     super.initState();
     _controller = AnimationController(
@@ -38,7 +109,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
       duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
-    
+
     _flipAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -46,14 +117,14 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
       parent: _controller,
       curve: Curves.easeInOut,
     ));
-      _scaleAnimation = Tween<double>(
+    _scaleAnimation = Tween<double>(
       begin: 1.0,
       end: 1.015,
     ).animate(CurvedAnimation(
       parent: _hoverController,
       curve: Curves.easeInOut,
     ));
-    
+
     _elevationAnimation = Tween<double>(
       begin: 8.0,
       end: 20.0,
@@ -61,7 +132,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
       parent: _hoverController,
       curve: Curves.easeInOut,
     ));
-    
+
     _borderColorAnimation = ColorTween(
       begin: AppTheme.primaryPurple.withOpacity(0.1),
       end: AppTheme.primaryPurple.withOpacity(0.4),
@@ -69,9 +140,10 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
       parent: _borderController,
       curve: Curves.easeInOut,
     ));
-    
+
     _startBorderAnimation();
-  }  
+  }
+
   void _startBorderAnimation() {
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted && !_isHovered && !_isFlipped) {
@@ -85,12 +157,11 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
           }
         });
       } else {
-        // Retry later if currently hovered or flipped
         _startBorderAnimation();
       }
     });
   }
-  
+
   @override
   void dispose() {
     _controller.dispose();
@@ -108,7 +179,9 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
     } else {
       _controller.reverse();
     }
-  }  void _onHoverEnter() {
+  }
+
+  void _onHoverEnter() {
     setState(() {
       _isHovered = true;
     });
@@ -122,21 +195,28 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
     });
     _hoverController.reverse();
     _startBorderAnimation();
-  }@override
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<ImatDataHandler>(
       builder: (context, iMat, child) {
-        // Check if product is in cart and get quantity
         final cartItems = iMat.getShoppingCart().items;
-        final cartItem = cartItems.where((item) => item.product.productId == widget.product.productId).firstOrNull;
+        final cartItem = cartItems
+            .where((item) => item.product.productId == widget.product.productId)
+            .firstOrNull;
         final quantity = cartItem?.amount.toInt() ?? 0;
-        final isInCart = quantity > 0;        return MouseRegion(
+        final isInCart = quantity > 0;
+
+        return MouseRegion(
           onEnter: (_) => _onHoverEnter(),
           onExit: (_) => _onHoverExit(),
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
-            onTap: _flipCard,            child: AnimatedBuilder(
-              animation: Listenable.merge([_flipAnimation, _scaleAnimation, _borderColorAnimation]),
+            onTap: _flipCard,
+            child: AnimatedBuilder(
+              animation: Listenable.merge(
+                  [_flipAnimation, _scaleAnimation, _borderColorAnimation]),
               builder: (context, child) {
                 final isShowingFront = _flipAnimation.value < 0.5;
                 return Transform.scale(
@@ -152,7 +232,8 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(_isHovered ? 0.2 : 0.08),
+                            color: Colors.black
+                                .withOpacity(_isHovered ? 0.2 : 0.08),
                             blurRadius: _elevationAnimation.value,
                             offset: Offset(0, _isHovered ? 6 : 2),
                           ),
@@ -162,24 +243,29 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                               blurRadius: 20,
                               offset: const Offset(0, 0),
                             ),
-                        ],                        border: _isHovered 
-                          ? Border.all(
-                              color: AppTheme.primaryPurple.withOpacity(0.5),
-                              width: 3,
-                            )
-                          : Border.all(
-                              color: _borderColorAnimation.value ?? AppTheme.primaryPurple.withOpacity(0.1),
-                              width: 1,
-                            ),
-                      ),                      child: Stack(
-                        children: [
-                          isShowingFront 
-                            ? _buildFrontCard(iMat, isInCart, cartItem, quantity)
-                            : Transform(
-                                alignment: Alignment.center,
-                                transform: Matrix4.identity()..rotateY(3.14159),
-                                child: _buildBackCard(iMat),
+                        ],
+                        border: _isHovered
+                            ? Border.all(
+                                color: AppTheme.primaryPurple.withOpacity(0.5),
+                                width: 3,
+                              )
+                            : Border.all(
+                                color: _borderColorAnimation.value ??
+                                    AppTheme.primaryPurple.withOpacity(0.1),
+                                width: 1,
                               ),
+                      ),
+                      child: Stack(
+                        children: [
+                          isShowingFront
+                              ? _buildFrontCard(
+                                  iMat, isInCart, cartItem, quantity)
+                              : Transform(
+                                  alignment: Alignment.center,
+                                  transform: Matrix4.identity()
+                                    ..rotateY(3.14159),
+                                  child: _buildBackCard(iMat),
+                                ),
                         ],
                       ),
                     ),
@@ -191,15 +277,17 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
         );
       },
     );
-  }  Widget _buildFrontCard(ImatDataHandler iMat, bool isInCart, ShoppingItem? cartItem, int quantity) {
+  }
+
+  Widget _buildFrontCard(
+      ImatDataHandler iMat, bool isInCart, ShoppingItem? cartItem, int quantity) {
     final isFavorite = iMat.isFavorite(widget.product);
-    
+
     return Stack(
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Product Image with shimmer effect
             Expanded(
               flex: 3,
               child: Container(
@@ -213,22 +301,21 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: iMat.getImage(widget.product) ?? Container(
-                          color: Colors.grey[100],
-                          child: Icon(
-                            Icons.shopping_bag_outlined,
-                            size: 40,
-                            color: Colors.grey[400],
-                          ),
-                        ),
+                        child: iMat.getImage(widget.product) ??
+                            Container(
+                              color: Colors.grey[100],
+                              child: Icon(
+                                Icons.shopping_bag_outlined,
+                                size: 40,
+                                color: Colors.grey[400],
+                              ),
+                            ),
                       ),
                     ],
                   ),
                 ),
               ),
             ),
-            
-            // Product Info
             Expanded(
               flex: 2,
               child: Padding(
@@ -242,26 +329,50 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Product Name
                     Expanded(
-                      child: Text(
-                        widget.product.name,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textPrimary,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                      child: Column( // Wrap existing Text in a Column
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.product.name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textPrimary,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4), // Add some space
+                          GestureDetector( // Make the new info section tappable
+                            onTap: _flipCard,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  size: 14,
+                                  color: AppTheme.textSecondary,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "Tryck för detaljer", // Changed text here
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppTheme.textSecondary,
+                                    // decoration: TextDecoration.underline, // Optional: if you want underline
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    
-                    // Price and Add to Cart Button or Quantity Controls
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Price
                         Text(
                           '${widget.product.price.toStringAsFixed(2)} ${widget.product.unit}',
                           style: const TextStyle(
@@ -270,8 +381,6 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                             color: AppTheme.primaryPurple,
                           ),
                         ),
-                        
-                        // Add to Cart Button or Quantity Controls
                         if (!isInCart)
                           _buildAddButton(iMat)
                         else
@@ -284,10 +393,9 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
             ),
           ],
         ),
-          // Heart button for favorites
         Positioned(
           top: 8,
-          left: 8, // Changed from right: 8 to left: 8
+          left: 8,
           child: GestureDetector(
             onTap: () {
               iMat.toggleFavorite(widget.product);
@@ -299,7 +407,9 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                 color: Colors.white.withOpacity(0.95),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: isFavorite ? AppTheme.primaryPurple.withOpacity(0.3) : AppTheme.border,
+                  color: isFavorite
+                      ? AppTheme.primaryPurple.withOpacity(0.3)
+                      : AppTheme.border,
                   width: 1,
                 ),
                 boxShadow: [
@@ -324,16 +434,15 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
 
   Widget _buildBackCard(ImatDataHandler iMat) {
     final productDetail = iMat.getDetail(widget.product);
-    
+
     return Padding(
       padding: const EdgeInsets.all(AppTheme.paddingMedium),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Back card header
           Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.info_outline,
                 color: AppTheme.primaryPurple,
                 size: 20,
@@ -350,13 +459,11 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
             ],
           ),
           const SizedBox(height: 16),
-          
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Product name
                   Text(
                     widget.product.name,
                     style: const TextStyle(
@@ -366,27 +473,19 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                     ),
                   ),
                   const SizedBox(height: 12),
-                  
                   if (productDetail != null) ...[
-                    // Brand
                     if (productDetail.brand.isNotEmpty) ...[
                       _buildInfoRow('Märke', productDetail.brand),
                       const SizedBox(height: 8),
                     ],
-                    
-                    // Description
                     if (productDetail.description.isNotEmpty) ...[
                       _buildInfoRow('Beskrivning', productDetail.description),
                       const SizedBox(height: 8),
                     ],
-                    
-                    // Contents
                     if (productDetail.contents.isNotEmpty) ...[
                       _buildInfoRow('Innehåll', productDetail.contents),
                       const SizedBox(height: 8),
                     ],
-                    
-                    // Origin
                     if (productDetail.origin.isNotEmpty) ...[
                       _buildInfoRow('Ursprung', productDetail.origin),
                       const SizedBox(height: 8),
@@ -418,10 +517,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                       ),
                     ),
                   ],
-                  
                   const SizedBox(height: 16),
-                  
-                  // Price info
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -453,7 +549,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                 ],
               ),
             ),
-          ),          // Flip back hint with enhanced styling
+          ),
           Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             margin: const EdgeInsets.only(top: 8),
@@ -476,7 +572,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                 AnimatedRotation(
                   turns: _isHovered ? 0.5 : 0.0,
                   duration: const Duration(milliseconds: 300),
-                  child: Icon(
+                  child: const Icon(
                     Icons.flip_to_front,
                     size: 18,
                     color: AppTheme.primaryPurple,
@@ -521,28 +617,20 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
         ),
       ],
     );
-  }  Widget _buildAddButton(ImatDataHandler iMat) {
-    return GestureDetector(
-      onTap: () {
+  }
+
+  Widget _buildAddButton(ImatDataHandler iMat) {
+    return _AnimatedProductTileButton(
+      icon: Icons.add,
+      tooltip: 'Lägg till i varukorg',
+      onPressed: () {
         iMat.shoppingCartAdd(ShoppingItem(widget.product));
       },
-      child: Container(
-        height: 32,
-        width: 32,
-        decoration: BoxDecoration(
-          color: AppTheme.primaryPurple,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Icon(
-          Icons.add,
-          color: AppTheme.buttonText,
-          size: 18,
-        ),
-      ),
     );
   }
 
-  Widget _buildQuantityControls(ImatDataHandler iMat, ShoppingItem cartItem, int quantity) {
+  Widget _buildQuantityControls(
+      ImatDataHandler iMat, ShoppingItem cartItem, int quantity) {
     return GestureDetector(
       onTap: () {}, // Prevent flip when tapping quantity controls
       child: Container(
@@ -554,70 +642,44 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Decrease button
-            GestureDetector(
-              onTap: () {
+            _AnimatedProductTileButton(
+              icon: Icons.remove,
+              tooltip: 'Minska antal',
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(8),
+                bottomLeft: Radius.circular(8),
+              ),
+              onPressed: () {
                 if (quantity > 1) {
                   iMat.shoppingCartUpdate(cartItem, delta: -1);
                 } else {
                   iMat.shoppingCartRemove(cartItem);
                 }
               },
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryPurple,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    bottomLeft: Radius.circular(8),
-                  ),
-                ),
-                child: const Icon(
-                  Icons.remove,
-                  color: AppTheme.buttonText,
-                  size: 16,
-                ),
-              ),
             ),
-            
-            // Quantity display
             Container(
-              width: 40,
+              width: 36,
               height: 32,
-              child: Center(
-                child: Text(
-                  quantity.toString(),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.primaryPurple,
-                  ),
+              alignment: Alignment.center,
+              child: Text(
+                quantity.toString(),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.primaryPurple,
                 ),
               ),
             ),
-            
-            // Increase button
-            GestureDetector(
-              onTap: () {
+            _AnimatedProductTileButton(
+              icon: Icons.add,
+              tooltip: 'Öka antal',
+              borderRadius: const BorderRadius.only(
+                topRight: Radius.circular(8),
+                bottomRight: Radius.circular(8),
+              ),
+              onPressed: () {
                 iMat.shoppingCartUpdate(cartItem, delta: 1);
               },
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryPurple,
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
-                  ),
-                ),
-                child: const Icon(
-                  Icons.add,
-                  color: AppTheme.buttonText,
-                  size: 16,
-                ),
-              ),
             ),
           ],
         ),
