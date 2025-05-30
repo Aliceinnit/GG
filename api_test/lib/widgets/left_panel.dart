@@ -96,14 +96,15 @@ class LeftPanel extends StatelessWidget {
           const Text('Kategorier', style: AppTheme.headingMedium),
           const SizedBox(height: 12),
           Expanded(
-            child: ListView(
-              children: categories.entries.map((entry) {
-                final categoryName = entry.key;
-                final subcategories = entry.value;
-
+            child: ListView.builder(
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                final category = categories.entries.elementAt(index);
                 return ExpansionTile(
-                  title: Text(categoryName),
-                  children: subcategories.map((subcategory) {
+                  shape: const Border(), // Added to remove border when expanded
+                  collapsedShape: const Border(), // Added to remove border when collapsed
+                  title: Text(category.key),
+                  children: category.value.map((subcategory) {
                     return HoverListTile(
                       title: subcategory,
                       onTap: () {
@@ -115,7 +116,7 @@ class LeftPanel extends StatelessWidget {
                             MaterialPageRoute(
                               builder: (context) => SubcategoryView(
                                 category: selectedCategory,
-                                headcategory: categoryName,
+                                headcategory: category.key,
                                 subcategoryName: subcategory,
                                 products: products,
                               ),
@@ -126,7 +127,7 @@ class LeftPanel extends StatelessWidget {
                     );
                   }).toList(),
                 );
-              }).toList(),
+              },
             ),
           ),
         ],

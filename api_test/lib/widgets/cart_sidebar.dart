@@ -245,7 +245,6 @@ class _CartItem extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Decrease button
           GestureDetector(
             onTap: () {
               if (quantity > 1) {
@@ -264,15 +263,13 @@ class _CartItem extends StatelessWidget {
                   bottomLeft: Radius.circular(8),
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.remove,
                 color: AppTheme.buttonText,
-                size: 16,
+                size: 18,
               ),
             ),
           ),
-          
-          // Quantity display
           Container(
             width: 40,
             height: 32,
@@ -287,8 +284,6 @@ class _CartItem extends StatelessWidget {
               ),
             ),
           ),
-          
-          // Increase button
           GestureDetector(
             onTap: () {
               iMat.shoppingCartUpdate(cartItem, delta: 1);
@@ -303,10 +298,10 @@ class _CartItem extends StatelessWidget {
                   bottomRight: Radius.circular(8),
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.add,
                 color: AppTheme.buttonText,
-                size: 16,
+                size: 18,
               ),
             ),
           ),
