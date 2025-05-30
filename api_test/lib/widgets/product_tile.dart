@@ -75,9 +75,10 @@ class _AnimatedProductTileButtonState extends State<_AnimatedProductTileButton> 
 }
 
 class ProductTile extends StatefulWidget {
-  const ProductTile(this.product, {super.key});
+  const ProductTile(this.product, {super.key, this.historicAmount}); // Added historicAmount
 
   final Product product;
+  final int? historicAmount; // New parameter
 
   @override
   State<ProductTile> createState() => _ProductTileState();
@@ -381,7 +382,10 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                             color: AppTheme.primaryPurple,
                           ),
                         ),
-                        if (!isInCart)
+                        // Conditional display based on historicAmount
+                        if (widget.historicAmount != null)
+                          _buildHistoricAmountDisplay() // Call to helper method
+                        else if (!isInCart)
                           _buildAddButton(iMat)
                         else
                           _buildQuantityControls(iMat, cartItem!, quantity),
@@ -428,6 +432,31 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
           ),
         ),
       ],
+    );
+  }
+
+  // Helper method to build the historic amount display
+  Widget _buildHistoricAmountDisplay() {
+    String unitSuffix = 'st'; // Default to 'st'
+    if (widget.product.unit.contains('/')) {
+      final parts = widget.product.unit.split('/');
+      if (parts.length > 1) {
+        final lastPart = parts.last.toLowerCase();
+        if (lastPart == 'kg') {
+          unitSuffix = 'kg';
+        } else if (lastPart == 'st') {
+          unitSuffix = 'st';
+        }
+        // Add more conditions if other units like 'g', 'l', 'ml' are possible
+      }
+    }
+    return Text(
+      'Antal: ${widget.historicAmount} $unitSuffix',
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
+        color: AppTheme.textPrimary, // Or AppTheme.primaryPurple
+      ),
     );
   }
 
@@ -624,6 +653,15 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
       tooltip: 'Lägg till i varukorg',
       onPressed: () {
         iMat.shoppingCartAdd(ShoppingItem(widget.product));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${widget.product.name} har lagts till i kundvagnen.',
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: AppTheme.primaryPurple,
+          ),
+        );
       },
     );
   }
@@ -653,6 +691,15 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                   iMat.shoppingCartUpdate(cartItem, delta: -1);
                 } else {
                   iMat.shoppingCartRemove(cartItem);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        '${widget.product.name} har tagits bort från kundvagnen.',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: AppTheme.error, // Or another appropriate color
+                    ),
+                  );
                 }
               },
             ),
@@ -678,6 +725,17 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
               ),
               onPressed: () {
                 iMat.shoppingCartUpdate(cartItem, delta: 1);
+                // Show SnackBar only when increasing, as initial add is handled by _buildAddButton
+                // and removal has its own message.
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Antal för ${widget.product.name} har ökats till ${quantity + 1}.',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    backgroundColor: AppTheme.primaryPurple,
+                  ),
+                );
               },
             ),
           ],

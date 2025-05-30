@@ -544,4 +544,22 @@ import 'package:http/http.dart' as http;
 
     notifyListeners();
   }
+
+  final List<Order> _favoriteOrders = [];
+
+  List<Order> get favoriteOrders => _favoriteOrders.toList();
+
+  bool isOrderFavorite(Order order) {
+    return _favoriteOrders.any((favOrder) => favOrder.orderNumber == order.orderNumber);
+  }
+
+  void toggleOrderFavorite(Order order) {
+    final isCurrentlyFavorite = isOrderFavorite(order);
+    if (isCurrentlyFavorite) {
+      _favoriteOrders.removeWhere((favOrder) => favOrder.orderNumber == order.orderNumber);
+    } else {
+      _favoriteOrders.add(order);
+    }
+    notifyListeners();
+  }
 }

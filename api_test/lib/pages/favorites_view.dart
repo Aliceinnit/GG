@@ -5,8 +5,12 @@ import 'package:provider/provider.dart';
 import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/widgets/product_tile.dart';
 import 'package:api_test/pages/account_view.dart'; // Added for sidebar navigation
-import 'package:api_test/pages/history_view.dart'; // Added for sidebar navigation
+import 'package:api_test/pages/history_view.dart' as HistoryViewPage; // Added for sidebar navigation and to prevent name clashes
 import 'package:api_test/widgets/cart_view.dart'; // Added for cart overlay
+import 'package:api_test/model/imat/order.dart'; // Added for Order type
+import 'package:intl/intl.dart'; // Added for DateFormat
+import 'package:api_test/app_theme.dart'; // Added for AppTheme
+import 'package:api_test/model/imat/shopping_item.dart'; // Added for ShoppingItem
 
 class FavoritesView extends StatefulWidget {
   const FavoritesView({super.key});
@@ -27,6 +31,7 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
   bool _isVarorExpanded = true; // Varor open by default
   bool _isInkopslistorExpanded = false; // Inköpslistor closed by default
   bool _isOrdrarExpanded = false; // Ordrar closed by default
+  Order? _selectedOrder; // Added to manage expanded order in favorites
 
   // State for hover effects on "Visa/Stäng"
   Map<String, bool> _isHovering = {};
@@ -62,10 +67,16 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
     super.dispose();
   }
 
+  String _formatDateTime(DateTime dt) { // Added from history_view.dart
+    final formatter = DateFormat('yyyy-MM-dd, HH:mm');
+    return formatter.format(dt);
+  }
+
   @override
   Widget build(BuildContext context) {
     final iMat = Provider.of<ImatDataHandler>(context);
     final favoriteProducts = iMat.favorites; // Use live favorites list
+    final favoriteOrders = iMat.favoriteOrders; // Get favorite orders
 
 
     const int varorGridCrossAxisCount = 6;
@@ -250,13 +261,15 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
                           _isOrdrarExpanded = expanded;
                         });
                       },
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          child: const Text('Inga favoritordrar här ännu.'),
-                        ),
-                      ],
+                      children: favoriteOrders.isEmpty
+                          ? [
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                child: const Text('Inga favoritordrar här ännu.'),
+                              ),
+                            ]
+                          : [_buildOrdersList(context, favoriteOrders)], // Updated to use favoriteOrders
                     ),
                   ],
                 ),
@@ -399,7 +412,7 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
             onTap: () {
               setState(() => _showSidebar = false);
               _animationController.reverse().then((_) {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryView()));
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryViewPage.HistoryView())); // Use aliased import
               });
             },
           ),
@@ -467,6 +480,153 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
               minimumSize: const Size(double.infinity, 50),
             ),
             child: const Text('Till kassan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Copied and adapted from history_view.dart
+  Widget _buildOrdersList(BuildContext context, List<Order> orders) {
+    final iMat = Provider.of<ImatDataHandler>(context, listen: false);
+    if (orders.isEmpty) {
+      return const Center(child: Text('Inga favoritordrar att visa.')); // Corrected typo
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: orders.length,
+      itemBuilder: (context, index) {
+        final order = orders[index];
+        // Listen to changes for isFavorite state
+        final isFavorite = context.watch<ImatDataHandler>().isOrderFavorite(order);
+
+        return ExpansionTile(
+          title: Row(
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.favorite,
+                  color: isFavorite ? AppTheme.primaryPurple : Colors.white,
+                  size: 32, 
+                  shadows: isFavorite
+                      ? null
+                      : [
+                          Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: const Offset(1.0, 0)),
+                          Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: const Offset(-1.0, 0)),
+                          Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: const Offset(0, 1.0)),
+                          Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: const Offset(0, -1.0)),
+                        ],
+                ),
+                tooltip: isFavorite ? 'Ta bort från favoriter' : 'Lägg till som favorit',
+                onPressed: () {
+                  iMat.toggleOrderFavorite(order);
+                },
+              ),
+              const SizedBox(width: 8), 
+              Text(
+                'Order ${order.orderNumber}',
+                style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: _selectedOrder == order ? AppTheme.primaryPurple : AppTheme.textPrimary),
+              ),
+            ],
+          ),
+          initiallyExpanded: _selectedOrder == order,
+          onExpansionChanged: (bool expanding) {
+            setState(() {
+              if (expanding) {
+                _selectedOrder = order;
+              } else {
+                if (_selectedOrder == order) {
+                  _selectedOrder = null;
+                }
+              }
+            });
+          },
+          childrenPadding: EdgeInsets.zero,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          children: <Widget>[
+            _buildOrderDetails(order),
+          ],
+        );
+      },
+    );
+  }
+
+  // Copied and adapted from history_view.dart
+  Widget _buildOrderDetails(Order order) {
+    const int crossAxisCount = 6;
+    const double childAspectRatio = 0.8;
+    const double spacing = 12.0;
+    final iMat = Provider.of<ImatDataHandler>(context, listen: false);
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Datum: ${_formatDateTime(order.date)}', style: AppTheme.bodyMedium),
+            ],
+          ),
+          const SizedBox(height: AppTheme.paddingMedium),
+          if (order.items.isEmpty)
+            const Text('Denna order innehåller inga varor.')
+          else
+            GridView.builder(
+              controller: ScrollController(keepScrollOffset: false),
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: spacing,
+                mainAxisSpacing: spacing,
+                childAspectRatio: childAspectRatio,
+              ),
+              itemCount: order.items.length,
+              itemBuilder: (context, index) {
+                final item = order.items[index];
+                return ProductTile(item.product, historicAmount: item.amount.toInt());
+              },
+            ),
+          const SizedBox(height: AppTheme.paddingMedium),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Spacer(),
+              Text(
+                'Totalt: ${order.getTotal().toStringAsFixed(2)} kr',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+              ),
+              const SizedBox(width: 8.0),
+              ElevatedButton(
+                onPressed: () {
+                  for (final item in order.items) {
+                    iMat.shoppingCartAdd(ShoppingItem(item.product, amount: item.amount));
+                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        '${order.items.length} ${order.items.length == 1 ? "vara" : "varor"} från order ${order.orderNumber} har lagts till i kundvagnen.',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: AppTheme.primaryPurple,
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryPurple,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                child: const Text('Köp igen'),
+              ),
+            ],
           ),
         ],
       ),

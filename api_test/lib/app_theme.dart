@@ -57,34 +57,34 @@ class AppTheme {
 
   // Text styles
   static const TextStyle headingLarge = TextStyle(
-    fontSize: 24,
+    fontSize: 24.0, // explicit double
     fontWeight: FontWeight.bold,
     color: textPrimary,
   );
 
   static const TextStyle headingMedium = TextStyle(
-    fontSize: 20,
+    fontSize: 20.0, // explicit double
     fontWeight: FontWeight.w600,
     color: Color(0xFF3E2A5E),
   );
 
   static const TextStyle bodyLarge = TextStyle(
-    fontSize: 16,
+    fontSize: 16.0, // explicit double
     color: textPrimary,
   );
 
   static const TextStyle bodyMedium = TextStyle(
-    fontSize: 14,
+    fontSize: 14.0, // explicit double
     color: textPrimary,
   );
 
   static const TextStyle bodySmall = TextStyle(
-    fontSize: 12,
+    fontSize: 12.0, // explicit double
     color: textSecondary,
   );
 
   static const TextStyle buttonTextStyle = TextStyle(
-    fontSize: 16,
+    fontSize: 16.0, // explicit double
     fontWeight: FontWeight.w600,
     color: buttonText,
   );

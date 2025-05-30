@@ -10,6 +10,7 @@ import 'package:api_test/pages/history_view.dart';
 import 'package:api_test/pages/favorites_view.dart';
 import 'package:api_test/widgets/product_tile.dart';
 import 'package:api_test/widgets/app_navigation_bar.dart';
+import 'package:api_test/main.dart'; // Import main.dart to access navigatorKey
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -108,7 +109,12 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                         alignment: Alignment.topRight,
                         child: IconButton(
                           icon: Icon(Icons.close, color: AppTheme.primaryPurple),
-                          onPressed: () => setState(() => _showSidebar = false),
+                          onPressed: () {
+                            if (mounted) {
+                              setState(() => _showSidebar = false);
+                              _animationController.reverse();
+                            }
+                          },
                         ),
                       ),
                       Text("Mina sidor", style: AppTheme.headingMedium),
@@ -117,19 +123,32 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                         leading: Icon(Icons.favorite, color: AppTheme.primaryPurple),
                         title: Text("Favoriter", style: AppTheme.bodyLarge),
                         onTap: () {
-                          setState(() => _showSidebar = false);
-                          Navigator.push(
-                            context,
+                          if (navigatorKey.currentState == null) {
+                            print('navigatorKey.currentState is NULL in MainView for Favoriter');
+                            return;
+                          }
+                          navigatorKey.currentState!.push(
                             MaterialPageRoute(builder: (context) => const FavoritesView()),
                           );
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) {
+                              setState(() => _showSidebar = false);
+                              _animationController.reverse();
+                            }
+                          });
                         },
                       ),
                       ListTile(
                         leading: Icon(Icons.history, color: AppTheme.primaryPurple),
-                        title: Text("Tidigare inköp", style: AppTheme.bodyLarge),
+                        title: Text("Mina inköp", style: AppTheme.bodyLarge), // Changed text here
                         onTap: () {
-                          setState(() => _showSidebar = false);
-                          _showHistory(context);
+                          _showHistoryWithKey(); // Use new method with navigatorKey
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) {
+                              setState(() => _showSidebar = false);
+                              _animationController.reverse();
+                            }
+                          });
                         },
                       ),
                       const Spacer(),
@@ -137,12 +156,21 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                         width: double.infinity,
                         child: ElevatedButton(
                           style: AppTheme.primaryButtonStyle,
-                          onPressed: () => _showAccount(context),
+                          onPressed: () {
+                            _showAccountWithKey(); // Use new method with navigatorKey
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) {
+                                setState(() => _showSidebar = false);
+                                _animationController.reverse();
+                              }
+                            });
+                          },
                           child: Text('Logga in', style: AppTheme.buttonTextStyle),
                         ),
                       ),
                     ],
-                  ),                ),
+                  ),
+                ),
               ),
             ),
         ],
@@ -157,9 +185,31 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
     );
   }
 
+  // New method using GlobalKey
+  void _showAccountWithKey() {
+    if (navigatorKey.currentState == null) {
+      print('navigatorKey.currentState is NULL in MainView _showAccountWithKey');
+      return;
+    }
+    navigatorKey.currentState!.push(
+      MaterialPageRoute(builder: (context) => const AccountView()),
+    );
+  }
+
   void _showHistory(BuildContext context) {
     Navigator.push(
       context,
+      MaterialPageRoute(builder: (context) => const HistoryView()),
+    );
+  }
+
+  // New method using GlobalKey
+  void _showHistoryWithKey() {
+    if (navigatorKey.currentState == null) {
+      print('navigatorKey.currentState is NULL in MainView _showHistoryWithKey');
+      return;
+    }
+    navigatorKey.currentState!.push(
       MaterialPageRoute(builder: (context) => const HistoryView()),
     );
   }
