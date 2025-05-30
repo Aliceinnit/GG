@@ -95,7 +95,7 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
             children: [
               AppNavigationBar(
                 showSearchBar: false,
-                pageTitle: "Mina sidor", // Updated title
+                pageTitle: "Mina inköp", // Updated title
                 onCartPressed: () {
                   setState(() => _showCartOverlay = true);
                   _animationController.forward();
