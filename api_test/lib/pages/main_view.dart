@@ -187,18 +187,76 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
       crossAxisCount = 2; // Adjusted for very small screens
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(8),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount, // Use responsive crossAxisCount
-        crossAxisSpacing: 12,      // Your preferred spacing
-        mainAxisSpacing: 12,       // Your preferred spacing
-        childAspectRatio: 0.8,     // Your preferred aspect ratio
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _weeklyOfferBanner(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: GridView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              padding: const EdgeInsets.only(bottom: 24),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.8,
+              ),
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                return ProductTile(products[index]);
+              },
+            ),
+          ),
+        ],
       ),
-      itemCount: products.length,
-      itemBuilder: (context, index) {
-        return ProductTile(products[index]);
-      },
     );
   }
+
+  Widget _weeklyOfferBanner() {
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+    padding: const EdgeInsets.all(24),
+    decoration: BoxDecoration(
+      color: AppTheme.headerGreen,
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Veckans erbjudanden!',
+              style: AppTheme.headingLarge,
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryPurple,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              onPressed: () {
+                // Lägg till valfri navigation eller funktion
+              },
+              child: Text('Börja handla', style: AppTheme.buttonTextStyle),
+            ),
+          ],
+        ),
+        Image.asset(
+          'assets/images/feature.png', // Se till att du har en bild i din assets-mapp
+          width: 250,
+          fit: BoxFit.contain,
+        ),
+      ],
+    ),
+  );
+}
 }
