@@ -5,6 +5,7 @@ import 'package:api_test/model/imat/util/functions.dart';
 import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/model/internet_handler.dart';
 import 'package:api_test/pages/main_view.dart';
+import 'package:api_test/widgets/cart_overlay_provider.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
@@ -12,8 +13,11 @@ import 'package:provider/provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => ImatDataHandler(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ImatDataHandler()),
+        ChangeNotifierProvider(create: (context) => CartOverlayProvider()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -21,13 +25,53 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   // This widget is the root of your application.  @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'iMat Demo',
-      theme: ThemeData(colorScheme: AppTheme.colorScheme),
-      debugShowCheckedModeBanner: false,
+      title: 'iMat Demo',      theme: ThemeData(
+        colorScheme: AppTheme.colorScheme,
+        // Add text theme to prevent yellow underlines
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+          displayMedium: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+          displaySmall: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+          headlineLarge: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+          headlineMedium: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+          headlineSmall: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+          titleLarge: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+          titleMedium: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+          titleSmall: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+          bodyLarge: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+          bodyMedium: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+          bodySmall: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+          labelLarge: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+          labelMedium: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+          labelSmall: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+        ),
+        // Ensure no underlines on buttons and other elements
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            textStyle: const TextStyle(decoration: TextDecoration.none),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            textStyle: const TextStyle(decoration: TextDecoration.none),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            textStyle: const TextStyle(decoration: TextDecoration.none),
+          ),
+        ),
+      ),      debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        return Material(
+          child: CartOverlayWrapper(
+            child: child ?? const MainView(),
+          ),
+        );
+      },
       home: const MainView(),
     );
   }

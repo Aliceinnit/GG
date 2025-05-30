@@ -4,6 +4,7 @@ import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/pages/account_view.dart';
 import 'package:api_test/pages/main_view.dart';
 import 'package:api_test/app_theme.dart';
+import 'package:api_test/widgets/cart_overlay_provider.dart';
 
 // Global state for logo hover to persist across navigation
 class LogoHoverState extends ChangeNotifier {
@@ -239,8 +240,9 @@ class _AppNavigationBarState extends State<AppNavigationBar> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [                IconButton(
-                  onPressed: widget.onCartPressed ?? () {
-                    // Default behavior - could show cart modal or navigate to cart
+                  onPressed: () {
+                    final cartProvider = Provider.of<CartOverlayProvider>(context, listen: false);
+                    cartProvider.showCart();
                   },
                   icon: Icon(
                     Icons.shopping_bag_outlined,

@@ -8,7 +8,6 @@ import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/pages/account_view.dart';
 import 'package:api_test/pages/history_view.dart';
 import 'package:api_test/pages/favorites_view.dart';
-import 'package:api_test/widgets/cart_sidebar.dart';
 import 'package:api_test/widgets/product_tile.dart';
 import 'package:api_test/widgets/app_navigation_bar.dart';
 
@@ -21,11 +20,8 @@ class MainView extends StatefulWidget {
 
 class _MainViewState extends State<MainView> with TickerProviderStateMixin {
   bool _showSidebar = false;
-  bool _showCartOverlay = false;
   late AnimationController _animationController;
-  late Animation<Offset> _cartSlideAnimation;
   late Animation<Offset> _sidebarSlideAnimation;
-
   @override
   void initState() {
     super.initState();
@@ -33,13 +29,6 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _cartSlideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
     _sidebarSlideAnimation = Tween<Offset>(
       begin: const Offset(1.0, 0.0),
       end: Offset.zero,
@@ -65,8 +54,7 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
       body: Stack(
         children: [
           Column(
-            children: [
-              AppNavigationBar(
+            children: [              AppNavigationBar(
                 onSearch: (query) {
                   if (query.isNotEmpty) {
                     final searchResults = iMat.findProducts(query);
@@ -74,10 +62,6 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                   } else {
                     iMat.selectAllProducts();
                   }
-                },
-                onCartPressed: () {
-                  setState(() => _showCartOverlay = true);
-                  _animationController.forward();
                 },
                 onAccountPressed: () {
                   setState(() => _showSidebar = true);
@@ -94,15 +78,12 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                 ),
               ),
             ],
-          ),
-
-          if (_showSidebar || _showCartOverlay)
+          ),          if (_showSidebar)
             Positioned.fill(
               child: GestureDetector(
                 onTap: () {
                   setState(() {
                     _showSidebar = false;
-                    _showCartOverlay = false;
                   });
                   _animationController.reverse();
                 },
@@ -113,7 +94,7 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-            ),          if (_showSidebar)
+            ),if (_showSidebar)
             Positioned(
               top: 64,
               right: 0,
@@ -165,16 +146,8 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                         ),
                       ),
                     ],
-                  ),
-                ),
+                  ),                ),
               ),
-            ),          if (_showCartOverlay)
-            CartSidebar(
-              slideAnimation: _cartSlideAnimation,
-              onClose: () {
-                setState(() => _showCartOverlay = false);
-                _animationController.reverse();
-              },
             ),
         ],
       ),

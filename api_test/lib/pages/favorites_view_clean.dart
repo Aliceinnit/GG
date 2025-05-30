@@ -29,8 +29,10 @@ class _FavoritesViewState extends State<FavoritesView> {
     _scrollController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
+    final iMat = Provider.of<ImatDataHandler>(context);
     final favoriteProducts = _displayedFavoriteProducts;
 
     const int varorGridCrossAxisCount = 6;

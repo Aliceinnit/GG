@@ -3,11 +3,9 @@ import 'package:api_test/app_theme.dart';
 import 'package:api_test/model/imat/product.dart';
 import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/pages/account_view.dart';
-import 'package:api_test/pages/checkout_flow.dart';
 import 'package:api_test/pages/history_view.dart';
 import 'package:api_test/widgets/app_navigation_bar.dart';
 import 'package:api_test/widgets/breadcrumbs.dart';
-import 'package:api_test/widgets/cart_view.dart';
 import 'package:api_test/widgets/left_panel.dart';
 import 'package:api_test/widgets/product_tile.dart';
 import 'package:flutter/material.dart';
@@ -33,12 +31,9 @@ class SubcategoryView extends StatefulWidget {
 
 class _SubcategoryViewState extends State<SubcategoryView> with TickerProviderStateMixin {
   bool _showSidebar = false;
-  bool _showCartOverlay = false;
   late AnimationController _animationController;
-  late Animation<Offset> _cartSlideAnimation;
   late Animation<Offset> _sidebarSlideAnimation;
   late List<Product> _displayedProducts;
-
   @override
   void initState() {
     super.initState();
@@ -47,10 +42,6 @@ class _SubcategoryViewState extends State<SubcategoryView> with TickerProviderSt
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _cartSlideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
     _sidebarSlideAnimation = Tween<Offset>(
       begin: const Offset(1.0, 0.0),
       end: Offset.zero,
@@ -72,8 +63,7 @@ class _SubcategoryViewState extends State<SubcategoryView> with TickerProviderSt
       body: Stack(
         children: [
           Column(
-            children: [
-              AppNavigationBar(
+            children: [              AppNavigationBar(
                 onSearch: (query) {
                   setState(() {
                     if (query.isNotEmpty) {
@@ -83,10 +73,6 @@ class _SubcategoryViewState extends State<SubcategoryView> with TickerProviderSt
                     _displayedProducts = widget.products;
                   }
                   });
-                },
-                onCartPressed: () {
-                  setState(() => _showCartOverlay = true);
-                  _animationController.forward();
                 },
                 onAccountPressed: () {
                   setState(() => _showSidebar = true);
@@ -102,16 +88,14 @@ class _SubcategoryViewState extends State<SubcategoryView> with TickerProviderSt
                     Expanded(child: _centerStage(context, _displayedProducts)),
                   ],
                 ),
-              ),
-            ],
+              ),          ],
           ),
-          if (_showSidebar || _showCartOverlay)
+          if (_showSidebar)
             Positioned.fill(
               child: GestureDetector(
                 onTap: () {
                   setState(() {
                     _showSidebar = false;
-                    _showCartOverlay = false;
                   });
                   _animationController.reverse();
                 },
@@ -130,15 +114,6 @@ class _SubcategoryViewState extends State<SubcategoryView> with TickerProviderSt
               child: SlideTransition(
                 position: _sidebarSlideAnimation,
                 child: _sidebar(iMat),
-              ),
-            ),
-          if (_showCartOverlay)
-            Positioned(
-              top: 64,
-              right: 0,
-              child: SlideTransition(
-                position: _cartSlideAnimation,
-                child: _cartOverlay(),
               ),
             ),
         ],
@@ -213,49 +188,7 @@ class _SubcategoryViewState extends State<SubcategoryView> with TickerProviderSt
             ),
             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AccountView())),
             child: const Text('Logga in', style: TextStyle(color: Color(0xFFFCEEF4))),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _cartOverlay() {
-    return Container(
-      width: 320,
-      height: MediaQuery.of(context).size.height - 64,
-      color: const Color(0xffd2ebd8),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Align(
-            alignment: Alignment.topRight,
-            child: IconButton(
-              icon: const Icon(Icons.close),
-              tooltip: 'Stäng',
-              onPressed: () {
-                setState(() => _showCartOverlay = false);
-                _animationController.reverse();
-              },
-            ),
-          ),
-          const Text('Kundvagn', style: TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
-          const Expanded(child: CartView()),
-          const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const CheckoutFlow()));
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            child: const Text('Till kassan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-          ),
-        ],
+          ),        ],
       ),
     );
   }
