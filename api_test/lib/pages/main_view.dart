@@ -243,16 +243,32 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
       context,
       MaterialPageRoute(builder: (context) => const HistoryView()),
     );
-  }
-
-  Widget _centerStage(BuildContext context, List<Product> products) {
+  }  Widget _centerStage(BuildContext context, List<Product> products) {
+    // Calculate responsive grid columns based on screen width
+    final screenWidth = MediaQuery.of(context).size.width;
+    int crossAxisCount;
+    
+    if (screenWidth > 1400) {
+      crossAxisCount = 6; // Very wide screens
+    } else if (screenWidth > 1200) {
+      crossAxisCount = 5; // Large screens
+    } else if (screenWidth > 1000) {
+      crossAxisCount = 4; // Medium-large screens
+    } else if (screenWidth > 800) {
+      crossAxisCount = 3; // Medium screens
+    } else if (screenWidth > 600) {
+      crossAxisCount = 3; // Small-medium screens
+    } else {
+      crossAxisCount = 3; // Small screens
+    }
+    
     return GridView.builder(
       padding: const EdgeInsets.all(8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.8,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: 6,
+        mainAxisSpacing: 6,
+        childAspectRatio: 0.7, // Optimized for more compact tiles
       ),
       itemCount: products.length,
       itemBuilder: (context, index) {
