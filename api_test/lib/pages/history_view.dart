@@ -754,21 +754,51 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
+          backgroundColor: AppTheme.headerGreen, // Set background to primary green
           title: Text('Ta bort "${list.title}"?'),
           content: const Text('Är du säker på att du vill ta bort denna inköpslista? Detta kan inte ångras.'),
           actions: <Widget>[
             TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: AppTheme.primaryPurple, // Set button background to primary purple
+                foregroundColor: Colors.white, // Assuming white text is desired for contrast
+              ),
               child: const Text('Avbryt'),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
             ),
             ElevatedButton(
-              style: AppTheme.primaryButtonStyle.copyWith(backgroundColor: MaterialStateProperty.all(Colors.redAccent)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryPurple, // Set button background to primary purple
+                foregroundColor: Colors.white, // Assuming white text is desired for contrast
+              ),
               child: const Text('Ta bort'),
               onPressed: () {
+                // First, check if the list is a favorite
+                final bool wasFavorite = iMat.isShoppingListFavorite(list);
+
+                // Remove the shopping list
                 iMat.removeShoppingList(list.id);
+
+                // If it was a favorite, remove it from favorites as well
+                if (wasFavorite) {
+                  iMat.toggleShoppingListFavorite(list); // Toggling will remove it
+                }
+
+                // Check if the deleted list was the selected one and clear selection
+                if (_selectedShoppingList?.id == list.id) {
+                  setState(() {
+                    _selectedShoppingList = null;
+                  });
+                }
                 Navigator.of(dialogContext).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Inköpslistan "${list.title}" har tagits bort.'),
+                    backgroundColor: AppTheme.primaryPurple,
+                  ),
+                );
               },
             ),
           ],
