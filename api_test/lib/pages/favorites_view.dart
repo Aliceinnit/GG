@@ -11,6 +11,7 @@ import 'package:api_test/model/imat/order.dart'; // Added for Order type
 import 'package:intl/intl.dart'; // Added for DateFormat
 import 'package:api_test/app_theme.dart'; // Added for AppTheme
 import 'package:api_test/model/imat/shopping_item.dart'; // Added for ShoppingItem
+import 'package:api_test/model/imat/shopping_list.dart'; // Added for ShoppingList type
 
 class FavoritesView extends StatefulWidget {
   const FavoritesView({super.key});
@@ -32,6 +33,7 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
   bool _isInkopslistorExpanded = false; // Inköpslistor closed by default
   bool _isOrdrarExpanded = false; // Ordrar closed by default
   Order? _selectedOrder; // Added to manage expanded order in favorites
+  ShoppingList? _selectedShoppingList; // Added to manage expanded favorite shopping list
 
   // State for hover effects on "Visa/Stäng"
   Map<String, bool> _isHovering = {};
@@ -77,6 +79,7 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
     final iMat = Provider.of<ImatDataHandler>(context);
     final favoriteProducts = iMat.favorites; // Use live favorites list
     final favoriteOrders = iMat.favoriteOrders; // Get favorite orders
+    final favoriteShoppingLists = iMat.favoriteShoppingLists; // Get favorite shopping lists
 
 
     const int varorGridCrossAxisCount = 6;
@@ -243,13 +246,15 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
                           _isInkopslistorExpanded = expanded;
                         });
                       },
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          child: const Text('Inga favoritinköpslistor här ännu.'),
-                        ),
-                      ],
+                      children: favoriteShoppingLists.isEmpty
+                          ? [
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                child: const Text('Inga favoritinköpslistor här ännu.'),
+                              ),
+                            ]
+                          : [_buildFavoriteShoppingListsList(context, favoriteShoppingLists, iMat)], // Use new method
                     ),
                     const SizedBox(height: 16),
                     _buildExpansionTile(
@@ -625,6 +630,141 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
                   textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 child: const Text('Köp igen'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // New method to build the list of favorite shopping lists
+  Widget _buildFavoriteShoppingListsList(BuildContext context, List<ShoppingList> lists, ImatDataHandler iMat) {
+    if (lists.isEmpty) {
+      return const Center(child: Text('Inga favoritinköpslistor att visa.'));
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: lists.length,
+      itemBuilder: (context, index) {
+        final list = lists[index];
+        final isFavorite = iMat.isShoppingListFavorite(list); // Should always be true here
+
+        return ExpansionTile(
+          leading: IconButton(
+            icon: Icon(
+              Icons.favorite,
+              color: isFavorite ? AppTheme.primaryPurple : Colors.white, // Heart will be filled
+              size: 32,
+              shadows: isFavorite
+                  ? null
+                  : [
+                      Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: const Offset(1.0, 0)),
+                      Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: const Offset(-1.0, 0)),
+                      Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: const Offset(0, 1.0)),
+                      Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: const Offset(0, -1.0)),
+                    ],
+            ),
+            tooltip: 'Ta bort från favoritlistor', // Tooltip for removing from favorites
+            onPressed: () {
+              iMat.toggleShoppingListFavorite(list); // Toggle will remove it
+            },
+          ),
+          title: Text(
+            list.title,
+            style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: _selectedShoppingList == list ? AppTheme.primaryPurple : AppTheme.textPrimary),
+          ),
+          initiallyExpanded: _selectedShoppingList == list,
+          onExpansionChanged: (bool expanding) {
+            setState(() {
+              if (expanding) {
+                _selectedShoppingList = list;
+              } else {
+                if (_selectedShoppingList == list) {
+                  _selectedShoppingList = null;
+                }
+              }
+            });
+          },
+          childrenPadding: EdgeInsets.zero, // Details widget will handle its own padding
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          children: <Widget>[
+            _buildShoppingListDetailsForFavorites(list, iMat),
+          ],
+        );
+      },
+    );
+  }
+
+  // Adapted from history_view.dart's _buildShoppingListDetails for Favorites page
+  Widget _buildShoppingListDetailsForFavorites(ShoppingList list, ImatDataHandler iMat) {
+    const int crossAxisCount = 6;
+    const double childAspectRatio = 0.8;
+    const double spacing = 12.0;
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // No product search or add functionality on this page
+          if (list.items.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppTheme.paddingSmall),
+              child: Text('Denna inköpslista innehåller inga varor.'),
+            )
+          else
+            GridView.builder(
+              controller: ScrollController(keepScrollOffset: false), // Prevent scroll conflicts
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: spacing,
+                mainAxisSpacing: spacing,
+                childAspectRatio: childAspectRatio,
+              ),
+              itemCount: list.items.length,
+              itemBuilder: (context, index) {
+                final item = list.items[index];
+                // ProductTile displays item, no direct editing from here
+                return ProductTile(
+                  item.product, 
+                  historicAmount: item.amount.toInt(),
+                );
+              },
+            ),
+          const SizedBox(height: AppTheme.paddingMedium),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Spacer(),
+              Text(
+                'Totalt: ${list.getTotal().toStringAsFixed(2)} kr',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+              ),
+              const SizedBox(width: 8.0),
+              ElevatedButton(
+                onPressed: list.items.isNotEmpty ? () {
+                  iMat.addShoppingListToCart(list.id);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Alla varor från "${list.title}" har lagts till i kundvagnen.',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: AppTheme.primaryPurple,
+                    ),
+                  );
+                } : null, // Disable button if list is empty
+                style: AppTheme.primaryButtonStyle.copyWith(
+                  textStyle: MaterialStateProperty.all(const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                ),
+                child: const Text('Köp nu'),
               ),
             ],
           ),

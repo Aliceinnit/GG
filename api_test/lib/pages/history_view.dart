@@ -3,6 +3,8 @@ import 'package:api_test/app_theme.dart';
 import 'package:api_test/model/imat/order.dart';
 import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/model/imat/shopping_item.dart'; // Added for ShoppingItem
+import 'package:api_test/model/imat/shopping_list.dart'; // Added for ShoppingList
+import 'package:api_test/model/imat/product.dart'; // Added import for Product
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -22,15 +24,22 @@ class HistoryView extends StatefulWidget {
 
 class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin {
   Order? _selectedOrder;
+  ShoppingList? _selectedShoppingList; // Added to manage expanded shopping list
   late ScrollController _scrollController;
   bool _showSidebar = false;
-  bool _showCartOverlay = false;
+  bool _showCartOverlay = false; // Declared _showCartOverlay
+  bool _isInkopslistorExpanded = false; // Declared _isInkopslistorExpanded, initialized to false
+  bool _isOrdrarExpanded = true; // Ordrar open by default
+
+  // Animation Controllers and Tweens
   late AnimationController _animationController;
   late Animation<Offset> _cartSlideAnimation;
   late Animation<Offset> _sidebarSlideAnimation;
 
-  bool _isInkopslistorExpanded = false;
-  bool _isOrdrarExpanded = true; // Ordrar open by default
+  // State for product search within an expanded shopping list
+  String _shoppingListSearchQuery = '';
+  List<Product> _shoppingListSearchResults = [];
+  TextEditingController _shoppingListSearchController = TextEditingController();
 
   final Map<String, bool> _isHovering = {};
 
@@ -74,6 +83,7 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     final iMat = Provider.of<ImatDataHandler>(context);
     final orders = iMat.orders;
+    final shoppingLists = iMat.shoppingLists; // Get all shopping lists
 
     List<Widget> ordrarExpansionTileChildren;
     if (orders.isEmpty) {
@@ -86,6 +96,53 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
     } else {
       ordrarExpansionTileChildren = [_buildOrdersList(context, orders)];
     }
+
+    List<Widget> inkopslistorExpansionTileChildren;
+    if (shoppingLists.isEmpty) {
+      inkopslistorExpansionTileChildren = [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: Column(
+            children: [
+              const Text('Inga sparade inköpslistor här ännu.'),
+              const SizedBox(height: AppTheme.paddingMedium),
+              ElevatedButton(
+                style: AppTheme.primaryButtonStyle,
+                onPressed: () {
+                  _showCreateShoppingListDialog(context, iMat);
+                },
+                child: const Text('Ny inköpslista'),
+              ),
+            ],
+          ),
+        ),
+      ];
+    } else {
+      // Display all shopping lists directly
+      inkopslistorExpansionTileChildren = [_buildShoppingListsList(context, shoppingLists, iMat)];
+      
+      // Add the "Ny inköpslista" button at the bottom-left of the dropdown
+      inkopslistorExpansionTileChildren.add(
+        Padding(
+          padding: const EdgeInsets.only(top: AppTheme.paddingMedium, left: AppTheme.paddingSmall, bottom: AppTheme.paddingSmall),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Ny inköpslista'),
+              style: AppTheme.primaryButtonStyle.copyWith(
+                padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: AppTheme.paddingMedium, vertical: AppTheme.paddingSmall)),
+                textStyle: MaterialStateProperty.all(const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              ),
+              onPressed: () {
+                _showCreateShoppingListDialog(context, iMat);
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
 
     return Scaffold(
       backgroundColor: const Color(0xFFFDF0F5), // Match FavoritesView background
@@ -140,13 +197,8 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
                           _isInkopslistorExpanded = expanded;
                         });
                       },
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          child: const Text('Inga sparade inköpslistor här ännu.'), // Placeholder
-                        ),
-                      ],
+                      children: inkopslistorExpansionTileChildren,
+                      iMat: iMat,
                     ),
                     const SizedBox(height: 16.0),
                     _buildExpansionTile(
@@ -159,6 +211,7 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
                         });
                       },
                       children: ordrarExpansionTileChildren,
+                      iMat: iMat,
                     ),
                   ],
                 ),
@@ -215,6 +268,7 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
     required List<Widget> children,
     required bool isExpanded,
     required ValueChanged<bool> onExpansionChanged,
+    required ImatDataHandler iMat,
     EdgeInsetsGeometry? customChildrenPadding,
   }) {
     final EdgeInsetsGeometry effectiveChildrenPadding = customChildrenPadding ??
@@ -230,11 +284,16 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
       child: ExpansionTile(
         shape: const Border(),
         collapsedShape: const Border(),
-        title: Text(title,
-            style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF3E2A5E),
-                fontSize: 20.0)),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(title,
+                style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF3E2A5E),
+                    fontSize: 20.0)),
+          ],
+        ),
         initiallyExpanded: isExpanded,
         onExpansionChanged: onExpansionChanged,
         trailing: MouseRegion(
@@ -328,6 +387,396 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
       },
     );
   }
+
+  Widget _buildShoppingListsList(BuildContext context, List<ShoppingList> shoppingLists, ImatDataHandler iMat) { // Removed isFavoriteList parameter
+    if (shoppingLists.isEmpty) {
+      return Container(); // Should be handled by the main check in build method
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: shoppingLists.length,
+      itemBuilder: (context, index) {
+        final list = shoppingLists[index];
+        final isFavorite = iMat.isShoppingListFavorite(list); // Check if the list is a favorite
+
+        return ExpansionTile(
+          leading: IconButton( // Added IconButton for favorite toggle
+            icon: Icon(
+              Icons.favorite,
+              color: isFavorite ? AppTheme.primaryPurple : Colors.white,
+              size: 32,
+              shadows: isFavorite
+                  ? null
+                  : [
+                      Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: const Offset(1.0, 0)),
+                      Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: const Offset(-1.0, 0)),
+                      Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: const Offset(0, 1.0)),
+                      Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: const Offset(0, -1.0)),
+                    ],
+            ),
+            tooltip: isFavorite ? 'Ta bort från favoritlistor' : 'Lägg till som favoritlista',
+            onPressed: () {
+              iMat.toggleShoppingListFavorite(list);
+            },
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                list.title,
+                style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: _selectedShoppingList == list ? AppTheme.primaryPurple : AppTheme.textPrimary),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.edit, size: 16, color: AppTheme.buttonText),
+                    label: const Text('Byt namn', style: TextStyle(color: AppTheme.buttonText)),
+                    style: AppTheme.primaryButtonStyle.copyWith(
+                      padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: AppTheme.paddingSmall, vertical: AppTheme.paddingTiny)),
+                      textStyle: MaterialStateProperty.all(const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      backgroundColor: MaterialStateProperty.all(AppTheme.primaryPurple), // Ensure primary purple background
+                    ),
+                    onPressed: () {
+                      _showRenameShoppingListDialog(context, iMat, list);
+                    },
+                  ),
+                  const SizedBox(width: AppTheme.paddingSmall),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.delete, size: 16, color: AppTheme.buttonText),
+                    label: const Text('Ta bort', style: TextStyle(color: AppTheme.buttonText)),
+                    style: AppTheme.primaryButtonStyle.copyWith(
+                      backgroundColor: MaterialStateProperty.all(AppTheme.primaryPurple), // Changed from Colors.redAccent
+                      padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: AppTheme.paddingSmall, vertical: AppTheme.paddingTiny)),
+                      textStyle: MaterialStateProperty.all(const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    ),
+                    onPressed: () {
+                      _showDeleteShoppingListConfirmationDialog(context, iMat, list);
+                    },
+                  ),
+                ],
+              )
+            ],
+          ),
+          initiallyExpanded: _selectedShoppingList == list,
+          onExpansionChanged: (bool expanding) {
+            setState(() {
+              if (expanding) {
+                _selectedShoppingList = list;
+              } else {
+                if (_selectedShoppingList == list) {
+                  _selectedShoppingList = null;
+                }
+              }
+            });
+          },
+          childrenPadding: EdgeInsets.zero,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          children: <Widget>[
+            _buildShoppingListDetails(list, iMat),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildShoppingListDetails(ShoppingList list, ImatDataHandler iMat) {
+    const int crossAxisCount = 6;
+    const double childAspectRatio = 0.8;
+    const double spacing = 12.0;
+
+    // Filter products for search if this list is selected and query is not empty
+    if (_selectedShoppingList == list && _shoppingListSearchQuery.isNotEmpty) {
+      // Ensure we are working with a copy of the list to prevent modification issues
+      _shoppingListSearchResults = List.from(iMat.findProducts(_shoppingListSearchQuery));
+    } else if (_selectedShoppingList != list || _shoppingListSearchQuery.isEmpty) {
+      // Clear search results if this list is not selected or query is empty
+      _shoppingListSearchResults = [];
+    }
+
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Product Search Bar
+          if (_selectedShoppingList == list) // Show search only for the currently expanded list
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppTheme.paddingMedium),
+              child: TextField(
+                controller: _shoppingListSearchController,
+                decoration: InputDecoration(
+                  hintText: 'Sök produkt att lägga till...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _shoppingListSearchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() {
+                              _shoppingListSearchQuery = '';
+                              _shoppingListSearchController.clear();
+                              _shoppingListSearchResults = [];
+                            });
+                          },
+                        )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.paddingMediumSmall), // Used AppTheme.paddingMediumSmall as radius
+                    borderSide: BorderSide(color: AppTheme.primaryPurple.withOpacity(0.5)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.paddingMediumSmall), // Used AppTheme.paddingMediumSmall as radius
+                    borderSide: const BorderSide(color: AppTheme.primaryPurple, width: 2),
+                  ),
+                ),
+                onChanged: (query) {
+                  setState(() {
+                    _shoppingListSearchQuery = query;
+                    if (query.isEmpty) {
+                      _shoppingListSearchResults = [];
+                    } else {
+                      // Perform search (already handled by the logic at the start of the build method)
+                      // This ensures search results are updated as user types.
+                    }
+                  });
+                },
+              ),
+            ),
+
+          // Display Search Results (if any)
+          if (_shoppingListSearchResults.isNotEmpty && _selectedShoppingList == list)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("Sökresultat:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const SizedBox(height: AppTheme.paddingSmall),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount, // Changed from crossAxisCount - 1
+                    crossAxisSpacing: spacing,
+                    mainAxisSpacing: spacing,
+                    childAspectRatio: childAspectRatio, // Changed from childAspectRatio + 0.2
+                  ),
+                  itemCount: _shoppingListSearchResults.length,
+                  itemBuilder: (context, index) {
+                    final product = _shoppingListSearchResults[index];
+                    return ProductTile(
+                      product,
+                      shoppingListContext: true,
+                      onAddToShoppingList: (product, quantity) {
+                        iMat.addItemToShoppingList(list.id, ShoppingItem(product, amount: quantity.toDouble()));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('$quantity st ${product.name} lades till i "${list.title}".'),
+                            backgroundColor: AppTheme.primaryPurple,
+                          ),
+                        );
+                        // Optionally clear search or give other feedback
+                        // setState(() {
+                        //   _shoppingListSearchQuery = '';
+                        //   _shoppingListSearchController.clear();
+                        //   _shoppingListSearchResults = [];
+                        // });
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(height: AppTheme.paddingMedium),
+                const Text("Varor i listan:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          
+          // Existing items in the list
+          if (list.items.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppTheme.paddingSmall),
+              child: Text('Denna inköpslista innehåller inga varor.'),
+            )
+          else
+            GridView.builder(
+              controller: ScrollController(keepScrollOffset: false),
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: spacing,
+                mainAxisSpacing: spacing,
+                childAspectRatio: childAspectRatio,
+              ),
+              itemCount: list.items.length,
+              itemBuilder: (context, index) {
+                final item = list.items[index];
+                // Using ProductTile, assuming it can handle quantity display and removal from list
+                return ProductTile(
+                  item.product, 
+                  historicAmount: item.amount.toInt(),
+                  // Optional: Add callbacks for quantity change or removal if ProductTile supports it
+                  // onQuantityChanged: (newQuantity) {
+                  //   iMat.updateItemQuantityInShoppingList(list.id, item.product.productId, newQuantity.toDouble());
+                  // },
+                  // onRemove: () {
+                  //   iMat.removeItemFromShoppingList(list.id, item.product.productId);
+                  // },
+                );
+              },
+            ),
+          const SizedBox(height: AppTheme.paddingMedium),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Spacer(),
+              Text(
+                'Totalt: ${list.getTotal().toStringAsFixed(2)} kr',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
+              ),
+              const SizedBox(width: 8.0),
+              ElevatedButton(
+                onPressed: list.items.isNotEmpty ? () {
+                  iMat.addShoppingListToCart(list.id);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Alla varor från "${list.title}" har lagts till i kundvagnen.',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: AppTheme.primaryPurple,
+                    ),
+                  );
+                } : null, // Disable button if list is empty
+                style: AppTheme.primaryButtonStyle.copyWith(
+                  textStyle: MaterialStateProperty.all(const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                ),
+                child: const Text('Köp nu'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCreateShoppingListDialog(BuildContext context, ImatDataHandler iMat) {
+    final TextEditingController titleController = TextEditingController();
+    // Clear search when dialogs are shown, or when list selection changes
+    _shoppingListSearchController.clear();
+    _shoppingListSearchQuery = '';
+    _shoppingListSearchResults = [];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppTheme.headerGreen, // Added background color
+          title: const Text('Skapa ny inköpslista'),
+          content: TextField(
+            controller: titleController,
+            decoration: const InputDecoration(hintText: "Namn på inköpslista"),
+            autofocus: true,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Avbryt'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            ElevatedButton(
+              style: AppTheme.primaryButtonStyle,
+              child: const Text('Skapa'),
+              onPressed: () {
+                if (titleController.text.isNotEmpty) {
+                  iMat.addShoppingList(ShoppingList(title: titleController.text));
+                  Navigator.of(dialogContext).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showRenameShoppingListDialog(BuildContext context, ImatDataHandler iMat, ShoppingList list) {
+    final TextEditingController titleController = TextEditingController(text: list.title);
+    // Clear search when dialogs are shown
+    _shoppingListSearchController.clear();
+    _shoppingListSearchQuery = '';
+    _shoppingListSearchResults = [];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppTheme.headerGreen, // Added background color
+          title: Text('Byt namn på "${list.title}"'),
+          content: TextField(
+            controller: titleController,
+            decoration: const InputDecoration(hintText: "Nytt namn"),
+            autofocus: true,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Avbryt'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            ElevatedButton(
+              style: AppTheme.primaryButtonStyle,
+              child: const Text('Spara'),
+              onPressed: () {
+                if (titleController.text.isNotEmpty) {
+                  iMat.updateShoppingListTitle(list.id, titleController.text);
+                  Navigator.of(dialogContext).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteShoppingListConfirmationDialog(BuildContext context, ImatDataHandler iMat, ShoppingList list) {
+    // Clear search when dialogs are shown
+    _shoppingListSearchController.clear();
+    _shoppingListSearchQuery = '';
+    _shoppingListSearchResults = [];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('Ta bort "${list.title}"?'),
+          content: const Text('Är du säker på att du vill ta bort denna inköpslista? Detta kan inte ångras.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Avbryt'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            ElevatedButton(
+              style: AppTheme.primaryButtonStyle.copyWith(backgroundColor: MaterialStateProperty.all(Colors.redAccent)),
+              child: const Text('Ta bort'),
+              onPressed: () {
+                iMat.removeShoppingList(list.id);
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   Widget _buildOrderDetails(Order order) {
     const int crossAxisCount = 6;

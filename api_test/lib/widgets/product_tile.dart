@@ -75,10 +75,20 @@ class _AnimatedProductTileButtonState extends State<_AnimatedProductTileButton> 
 }
 
 class ProductTile extends StatefulWidget {
-  const ProductTile(this.product, {super.key, this.historicAmount}); // Added historicAmount
+  const ProductTile(
+    this.product, {
+    super.key,
+    this.historicAmount,
+    this.shoppingListContext = false, // New parameter
+    this.initialQuantityForShoppingList = 1, // New parameter
+    this.onAddToShoppingList, // New parameter
+  });
 
   final Product product;
-  final int? historicAmount; // New parameter
+  final int? historicAmount;
+  final bool shoppingListContext; // Indicates if the tile is used for adding to a shopping list
+  final int initialQuantityForShoppingList; // Initial quantity for shopping list mode
+  final Function(Product product, int quantity)? onAddToShoppingList; // Callback
 
   @override
   State<ProductTile> createState() => _ProductTileState();
@@ -94,6 +104,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
   late Animation<Color?> _borderColorAnimation;
   bool _isFlipped = false;
   bool _isHovered = false;
+  late int _shoppingListQuantity; // State for quantity in shopping list context
 
   @override
   void initState() {
@@ -143,6 +154,10 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
     ));
 
     _startBorderAnimation();
+
+    if (widget.shoppingListContext) {
+      _shoppingListQuantity = widget.initialQuantityForShoppingList;
+    }
   }
 
   void _startBorderAnimation() {
@@ -382,8 +397,10 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                             color: AppTheme.primaryPurple,
                           ),
                         ),
-                        // Conditional display based on historicAmount
-                        if (widget.historicAmount != null)
+                        // Conditional display based on context
+                        if (widget.shoppingListContext)
+                          _buildShoppingListQuantityControls(iMat) // New method for shopping list context
+                        else if (widget.historicAmount != null)
                           _buildHistoricAmountDisplay() // Call to helper method
                         else if (!isInCart)
                           _buildAddButton(iMat)
@@ -430,6 +447,81 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
               ],
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  // New method for quantity controls and add button in shopping list search context
+  Widget _buildShoppingListQuantityControls(ImatDataHandler iMat) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end, // Align to the right
+      children: [
+        Container(
+          height: 32,
+          decoration: BoxDecoration(
+            color: AppTheme.primaryPurple.withOpacity(0.1), // Background for the number area
+            borderRadius: BorderRadius.circular(8),      // Overall rounding for the -/1/+ group
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _AnimatedProductTileButton(
+                icon: Icons.remove,
+                tooltip: 'Minska antal',
+                borderRadius: const BorderRadius.only( // Left side rounded
+                  topLeft: Radius.circular(8),
+                  bottomLeft: Radius.circular(8),
+                ),
+                onPressed: () {
+                  if (_shoppingListQuantity > 1) {
+                    setState(() {
+                      _shoppingListQuantity--;
+                    });
+                  }
+                },
+              ),
+              Container( // Quantity display
+                width: 36, 
+                height: 32, 
+                alignment: Alignment.center,
+                // No separate decoration; background comes from the parent Container
+                child: Text(
+                  _shoppingListQuantity.toString(),
+                  style: const TextStyle(
+                    fontSize: 14, // Matched to the reference style in _buildQuantityControls
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.primaryPurple,
+                  ),
+                ),
+              ),
+              _AnimatedProductTileButton(
+                icon: Icons.add,
+                tooltip: 'Öka antal',
+                borderRadius: const BorderRadius.only( // Right side rounded
+                  topRight: Radius.circular(8),
+                  bottomRight: Radius.circular(8),
+                ),
+                onPressed: () {
+                  setState(() {
+                    _shoppingListQuantity++;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: AppTheme.paddingSmall), // Spacer before "Lägg till" button
+        // Add to Shopping List Button
+        ElevatedButton(
+          onPressed: () {
+            widget.onAddToShoppingList?.call(widget.product, _shoppingListQuantity);
+          },
+          style: AppTheme.primaryButtonStyle.copyWith(
+            padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: AppTheme.paddingSmall, vertical: AppTheme.paddingTiny)),
+            textStyle: MaterialStateProperty.all(const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          ),
+          child: const Text('Lägg till'),
         ),
       ],
     );

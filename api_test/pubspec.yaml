@@ -32,6 +32,7 @@ dependencies:
     sdk: flutter
   provider: ^6.1.4
   intl: ^0.20.2
+  uuid: ^4.3.3 # Added uuid package
 
   
 

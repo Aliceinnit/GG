@@ -11,6 +11,7 @@ import 'package:api_test/model/imat/settings.dart';
 import 'package:api_test/model/imat/shopping_cart.dart';
 import 'package:api_test/model/imat/shopping_item.dart';
 import 'package:api_test/model/imat/user.dart';
+import 'package:api_test/model/imat/shopping_list.dart'; // Added import
 import 'package:api_test/model/internet_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -122,6 +123,97 @@ class ImatDataHandler extends ChangeNotifier {
       _addFavorite(product);
     }
   }
+
+  //
+  // Manage Shopping Lists
+  //
+
+  final List<ShoppingList> _shoppingLists = [];
+
+  List<ShoppingList> get shoppingLists => _shoppingLists.toList(); // Return a copy
+
+  void addShoppingList(ShoppingList list) {
+    _shoppingLists.add(list);
+    // TODO: Persist shopping lists if needed via InternetHandler
+    notifyListeners();
+  }
+
+  void removeShoppingList(String listId) {
+    _shoppingLists.removeWhere((list) => list.id == listId);
+    // TODO: Persist changes if needed
+    notifyListeners();
+  }
+
+  void updateShoppingListTitle(String listId, String newTitle) {
+    final list = _shoppingLists.firstWhere((l) => l.id == listId, orElse: () => throw Exception("Shopping list not found"));
+    list.title = newTitle;
+    // TODO: Persist changes if needed
+    notifyListeners();
+  }
+
+  void addItemToShoppingList(String listId, ShoppingItem item) {
+    final list = _shoppingLists.firstWhere((l) => l.id == listId, orElse: () => throw Exception("Shopping list not found"));
+    // Check if product already exists in the list to update quantity, or add new
+    final existingItem = list.findItem(item.product.productId); // productId is already int
+    if (existingItem != null) {
+      existingItem.amount += item.amount;
+    } else {
+      list.items.add(item);
+    }
+    // TODO: Persist changes if needed
+    notifyListeners();
+  }
+
+  void removeItemFromShoppingList(String listId, String productId) {
+    final list = _shoppingLists.firstWhere((l) => l.id == listId, orElse: () => throw Exception("Shopping list not found"));
+    list.items.removeWhere((item) => item.product.productId.toString() == productId); // Convert product.productId to String for comparison if productId param remains String
+    // TODO: Persist changes if needed
+    notifyListeners();
+  }
+
+  void updateItemQuantityInShoppingList(String listId, String productId, double newAmount) {
+    final list = _shoppingLists.firstWhere((l) => l.id == listId, orElse: () => throw Exception("Shopping list not found"));
+    final item = list.findItem(int.parse(productId)); // Ensure productId is parsed to int if it's passed as String
+    if (item != null) {
+      if (newAmount <= 0) {
+        list.items.removeWhere((i) => i.product.productId.toString() == productId); // Convert product.productId to String for comparison
+      } else {
+        item.amount = newAmount;
+      }
+    }
+    // TODO: Persist changes if needed
+    notifyListeners();
+  }
+
+  // Method to add all items from a shopping list to the main shopping cart
+  void addShoppingListToCart(String listId) {
+    final list = _shoppingLists.firstWhere((l) => l.id == listId, orElse: () => throw Exception("Shopping list not found"));
+    for (var item in list.items) {
+      shoppingCartAdd(ShoppingItem(item.product, amount: item.amount)); // Use existing method to add to cart
+    }
+    // shoppingCartAdd already calls notifyListeners and persists
+  }
+
+  // Favorite Shopping Lists
+  final List<ShoppingList> _favoriteShoppingLists = [];
+
+  List<ShoppingList> get favoriteShoppingLists => _favoriteShoppingLists.toList();
+
+  bool isShoppingListFavorite(ShoppingList list) {
+    return _favoriteShoppingLists.any((favList) => favList.id == list.id);
+  }
+
+  void toggleShoppingListFavorite(ShoppingList list) {
+    final isCurrentlyFavorite = isShoppingListFavorite(list);
+    if (isCurrentlyFavorite) {
+      _favoriteShoppingLists.removeWhere((favList) => favList.id == list.id);
+    } else {
+      _favoriteShoppingLists.add(list);
+    }
+    // TODO: Persist favorite shopping lists if needed
+    notifyListeners();
+  }
+
 
   CreditCard getCreditCard() => _creditCard;
 
