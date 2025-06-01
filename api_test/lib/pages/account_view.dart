@@ -48,9 +48,9 @@ class _AccountViewState extends State<AccountView> {
     _postAddress.dispose();
     _cardType.dispose();
     _holdersName.dispose();
-    _cardNumber.dispose();
     _validMonth.dispose();
     _validYear.dispose();
+    _cardNumber.dispose();
     _verificationCode.dispose();
     super.dispose();
   }
@@ -71,9 +71,9 @@ class _AccountViewState extends State<AccountView> {
     final card = CreditCard(
       _cardType.text,
       _holdersName.text,
-      int.parse(_cardNumber.text),
       int.parse(_validMonth.text),
-      _validYear.text,
+      int.parse(_validYear.text),
+      _cardNumber.text,
       int.parse(_verificationCode.text));
 
     handler.setCustomer(customer);
@@ -170,7 +170,7 @@ class _AccountViewState extends State<AccountView> {
         const SizedBox(height: 12),
         TextField(controller: _email, decoration: const InputDecoration(labelText: 'E-postadress')),
         const SizedBox(height: 12),
-        TextField(controller: _password, decoration: const InputDecoration(labelText: 'Lösenord')),
+        TextField(controller: _password, decoration: const InputDecoration(labelText: 'Lösenord'), obscureText: true),
         const SizedBox(height: 12),
         TextField(controller: _phoneNumber, decoration: const InputDecoration(labelText: 'Telefon')),
         const SizedBox(height: 12),
@@ -199,7 +199,7 @@ class _AccountViewState extends State<AccountView> {
         const SizedBox(height: 12),
         TextField(controller: _validYear, decoration: const InputDecoration(labelText: 'Giltigt år')),
         const SizedBox(height: 12),
-        TextField(controller: _verificationCode, decoration: const InputDecoration(labelText: 'CCV')),
+        TextField(controller: _verificationCode, decoration: const InputDecoration(labelText: 'CCV'), obscureText: true),
       ],
     );
   }

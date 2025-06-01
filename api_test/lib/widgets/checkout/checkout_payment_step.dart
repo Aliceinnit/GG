@@ -1,3 +1,4 @@
+import 'package:api_test/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:api_test/model/imat_data_handler.dart';
@@ -31,7 +32,7 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.headerGreen,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -48,7 +49,7 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
                     padding: EdgeInsets.all(20),
                     child: Text(
                       'Betalningsmetod',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                      style: AppTheme.headingLarge,
                     ),
                   ),
                   Expanded(
@@ -59,14 +60,15 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
                             'Kortbetalning',
                             'Betala säkert med kort',
                             Icons.credit_card_outlined,
-                            Colors.blue,
+                            AppTheme.primaryPurple,
                           ),
                           const SizedBox(height: 12),
                           _buildPaymentOption(
                             'Swish',
                             'Snabb betalning med mobilen',
                             Icons.phone_android_outlined,
-                            Colors.orange,
+                            AppTheme.primaryPurple
+                            //const Color(0xFFF49FA7),
                           ),
                           const SizedBox(height: 24),
                           if (widget.selectedPaymentMethod == 'Kortbetalning')
@@ -103,10 +105,10 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.deepPurple.withOpacity(0.05) : Colors.grey[50],
+          color: isSelected ? AppTheme.primaryPurple.withOpacity(0.05) : AppTheme.background,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? Colors.deepPurple : Colors.transparent,
+            color: isSelected ? AppTheme.primaryPurple : Colors.transparent,
             width: 2,
           ),
         ),
@@ -116,12 +118,12 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: isSelected ? iconColor.withOpacity(0.1) : Colors.white,
+                color: isSelected ? iconColor.withOpacity(0.1) : AppTheme.background,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 icon,
-                color: isSelected ? iconColor : Colors.grey[600],
+                color: isSelected ? iconColor : AppTheme.primaryPurple,
                 size: 24,
               ),
             ),
@@ -135,16 +137,13 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: isSelected ? Colors.deepPurple : Colors.black87,
+                      color: isSelected ? AppTheme.primaryPurple : AppTheme.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
+                    style: AppTheme.bodyMedium
                   ),
                 ],
               ),
@@ -153,7 +152,7 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.deepPurple,
+                  color: AppTheme.primaryPurple,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
@@ -179,14 +178,14 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.deepPurple,
-            Colors.deepPurple.shade700,
+            AppTheme.primaryPurple,
+            AppTheme.primaryPurple,
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.deepPurple.withOpacity(0.3),
+            color: AppTheme.primaryPurple.withOpacity(0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -265,7 +264,7 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${creditCard.validMonth.toString().padLeft(2, '0')}/${creditCard.validYear.toString().substring(2)}',
+                    '${creditCard.validMonth.toString().padLeft(2, '0')}/${creditCard.validYear.toString()}',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -309,16 +308,16 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.05),
+        color: AppTheme.primaryPurple.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.2)),
       ),
       child: Column(
         children: [
           Icon(
             Icons.phone_android,
             size: 48,
-            color: Colors.orange,
+            color: AppTheme.textPrimary,
           ),
           const SizedBox(height: 12),
           const Text(
@@ -326,17 +325,14 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: AppTheme.primaryPurple,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             'Betalning sker säkert via din mobil med BankID',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
+            style: AppTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
         ],
@@ -352,7 +348,7 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
             child: OutlinedButton(
               onPressed: widget.onBack,
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.deepPurple),
+                side: const BorderSide(color: AppTheme.primaryPurple),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -363,7 +359,7 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.deepPurple,
+                  color: AppTheme.primaryPurple,
                 ),
               ),
             ),
@@ -374,7 +370,7 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
             child: ElevatedButton(
               onPressed: widget.selectedPaymentMethod.isNotEmpty ? widget.onNext : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
+                backgroundColor: AppTheme.primaryPurple,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(

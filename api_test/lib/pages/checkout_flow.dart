@@ -1,3 +1,5 @@
+import 'package:api_test/app_theme.dart';
+import 'package:api_test/widgets/app_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:api_test/model/imat_data_handler.dart';
@@ -31,11 +33,11 @@ class _CheckoutFlowState extends State<CheckoutFlow> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppTheme.background,
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(),
+            AppNavigationBar(showSearchBar: false,),
             if (currentStep < 4) CheckoutStepIndicator(
               currentStep: currentStep,
               stepTitles: stepTitles,
@@ -49,72 +51,6 @@ class _CheckoutFlowState extends State<CheckoutFlow> {
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios_new,
-                size: 18,
-                color: Colors.black87,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              currentStep < stepTitles.length ? stepTitles[currentStep] : '',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: Colors.black87,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.close,
-                size: 20,
-                color: Colors.black87,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
   Widget _buildCurrentStep() {
     switch (currentStep) {
       case 0:

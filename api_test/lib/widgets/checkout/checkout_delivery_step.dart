@@ -1,3 +1,4 @@
+import 'package:api_test/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:api_test/model/imat_data_handler.dart';
@@ -55,7 +56,7 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.headerGreen,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
@@ -72,7 +73,7 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
                     padding: EdgeInsets.all(20),
                     child: Text(
                       'Leveransadress & Tidpunkt',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                      style: AppTheme.headingLarge,
                     ),
                   ),
                   Expanded(
@@ -101,9 +102,9 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppTheme.headerGreen,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: AppTheme.background),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,7 +114,7 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
               Icon(
                 Icons.location_on_outlined,
                 size: 20,
-                color: Colors.grey[600],
+                color: AppTheme.primaryPurple,
               ),
               const SizedBox(width: 8),
               const Text(
@@ -121,7 +122,7 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: AppTheme.primaryPurple,
                 ),
               ),
             ],
@@ -133,11 +134,11 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
               labelText: 'Gatuadress',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: Colors.grey[300]!),
+                borderSide: BorderSide(color: AppTheme.primaryPurple),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: Colors.deepPurple),
+                borderSide: const BorderSide(color: AppTheme.primaryPurple),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
             ),
@@ -153,11 +154,11 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
                     labelText: 'Postnummer',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                      borderSide: BorderSide(color: AppTheme.primaryPurple),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
+                      borderSide: const BorderSide(color: AppTheme.primaryPurple),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
@@ -172,11 +173,11 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
                     labelText: 'Stad',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.grey[300]!),
+                      borderSide: BorderSide(color: AppTheme.primaryPurple),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.deepPurple),
+                      borderSide: const BorderSide(color: AppTheme.primaryPurple),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   ),
@@ -200,9 +201,9 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppTheme.headerGreen,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: AppTheme.background),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,7 +213,7 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
               Icon(
                 Icons.schedule_outlined,
                 size: 20,
-                color: Colors.grey[600],
+                color: AppTheme.primaryPurple,
               ),
               const SizedBox(width: 8),
               const Text(
@@ -220,7 +221,7 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: AppTheme.primaryPurple,
                 ),
               ),
             ],
@@ -242,10 +243,10 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isSelected ? Colors.deepPurple.withOpacity(0.1) : Colors.white,
+                      color: isSelected ? AppTheme.primaryPurple.withOpacity(0.1) : AppTheme.background,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                        color: isSelected ? Colors.deepPurple : Colors.grey[300]!,
+                        color: isSelected ? AppTheme.primaryPurple : Colors.grey[300]!,
                         width: isSelected ? 2 : 1,
                       ),
                     ),
@@ -254,7 +255,7 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
                         Icon(
                           Icons.access_time,
                           size: 16,
-                          color: isSelected ? Colors.deepPurple : Colors.grey[600],
+                          color: isSelected ? AppTheme.primaryPurple: Colors.grey[600],
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -262,7 +263,7 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                            color: isSelected ? Colors.deepPurple : Colors.black87,
+                            color: isSelected ? AppTheme.primaryPurple : Colors.black87,
                           ),
                         ),
                         const Spacer(),
@@ -270,7 +271,7 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
                           Icon(
                             Icons.check_circle,
                             size: 16,
-                            color: Colors.deepPurple,
+                            color: AppTheme.primaryPurple,
                           ),
                       ],
                     ),
@@ -298,7 +299,7 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
             child: OutlinedButton(
               onPressed: widget.onBack,
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.deepPurple),
+                side: const BorderSide(color: AppTheme.primaryPurple),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -309,7 +310,7 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.deepPurple,
+                  color: AppTheme.primaryPurple,
                 ),
               ),
             ),
@@ -320,14 +321,14 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
             child: ElevatedButton(
               onPressed: canProceed ? widget.onNext : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
+                backgroundColor: AppTheme.primaryPurple,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 elevation: 0,
-                disabledBackgroundColor: Colors.grey[300],
+                disabledBackgroundColor: Color.fromARGB(255, 201, 184, 227),
               ),
               child: const Text(
                 'Fortsätt till betalning',

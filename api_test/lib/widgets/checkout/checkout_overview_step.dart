@@ -1,3 +1,4 @@
+import 'package:api_test/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:api_test/model/imat_data_handler.dart';
@@ -42,7 +43,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppTheme.headerGreen,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
@@ -59,7 +60,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
                         padding: EdgeInsets.all(20),
                         child: Text(
                           'Granska din beställning',
-                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                          style: AppTheme.headingLarge,
                         ),
                       ),
                       Expanded(
@@ -68,7 +69,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildOrderItems(items),
+                              _buildOrderItems(items, iMat),
                               const SizedBox(height: 24),
                               _buildDeliveryInfo(),
                               const SizedBox(height: 24),
@@ -106,7 +107,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
     }
   }
 
-  Widget _buildOrderItems(List<ShoppingItem> items) {
+  Widget _buildOrderItems(List<ShoppingItem> items, iMat) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -115,13 +116,13 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
           children: [
             const Text(
               'Dina varor',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.primaryPurple),
             ),
             Text(
               '${items.length} ${items.length == 1 ? 'artikel' : 'artiklar'}',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: AppTheme.primaryPurple,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -130,7 +131,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
         const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
-            color: Colors.grey[50],
+            color: AppTheme.background,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -146,15 +147,15 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
                         Container(
                           width: 40,
                           height: 40,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.shopping_bag_outlined,
-                            color: Colors.grey[400],
-                            size: 20,
-                          ),
+                          child: iMat.getImage(item.product) ??
+                            Container(
+                              color: Colors.grey[100],
+                              child: Icon(
+                                Icons.shopping_bag_outlined,
+                                size: 40,
+                                color: Colors.grey[400],
+                              ),
+                            ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -172,10 +173,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
                               ),
                               Text(
                                 '${item.amount.toStringAsFixed(0)} ${item.product.unit}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
-                                ),
+                                style: AppTheme.bodySmall
                               ),
                             ],
                           ),
@@ -192,7 +190,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
                   ),
                   if (index < items.length - 1)
                     Divider(
-                      color: Colors.grey[200],
+                      color: AppTheme.background,
                       height: 1,
                       indent: 64,
                     ),
@@ -212,16 +210,16 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
     switch (widget.selectedDeliveryMethod) {
       case 'Hemleverans':
         icon = Icons.home_outlined;
-        iconColor = Colors.blue;
+        iconColor = AppTheme.primaryPurple;
         break;
       case 'Hämta i butik':
         icon = Icons.store_outlined;
-        iconColor = Colors.green;
+        iconColor = AppTheme.primaryPurple;
         break;
       case 'Paketombud':
       default:
         icon = Icons.local_shipping_outlined;
-        iconColor = Colors.orange;
+        iconColor = AppTheme.primaryPurple;
         break;
     }
 
@@ -236,7 +234,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.grey[50],
+            color: AppTheme.background,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -303,16 +301,16 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
     switch (widget.selectedPaymentMethod) {
       case 'Kortbetalning':
         icon = Icons.credit_card_outlined;
-        iconColor = Colors.blue;
+        iconColor = AppTheme.primaryPurple;
         break;
       case 'Swish':
         icon = Icons.phone_android_outlined;
-        iconColor = Colors.orange;
+        iconColor = AppTheme.primaryPurple;
         break;
       case 'Faktura':
       default:
         icon = Icons.receipt_long_outlined;
-        iconColor = Colors.green;
+        iconColor = AppTheme.primaryPurple;
         break;
     }
 
@@ -327,7 +325,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.grey[50],
+            color: AppTheme.background,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -366,9 +364,9 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.deepPurple.withOpacity(0.05),
+        color: AppTheme.primaryPurple.withOpacity(0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.deepPurple.withOpacity(0.2)),
+        border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.2)),
       ),
       child: Column(
         children: [
@@ -377,7 +375,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
             children: [
               const Text(
                 'Delsumma',
-                style: TextStyle(fontSize: 16),
+                style: AppTheme.bodyLarge,
               ),
               Text(
                 '${subtotal.toStringAsFixed(2)} kr',
@@ -394,7 +392,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
             children: [
               const Text(
                 'Leverans',
-                style: TextStyle(fontSize: 16),
+                style: AppTheme.bodyLarge,
               ),
               Text(
                 deliveryFee == 0 ? 'Gratis' : '${deliveryFee.toStringAsFixed(2)} kr',
@@ -408,7 +406,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
           const SizedBox(height: 12),
           Container(
             height: 1,
-            color: Colors.deepPurple.withOpacity(0.2),
+            color: AppTheme.primaryPurple.withOpacity(0.2),
           ),
           const SizedBox(height: 12),
           Row(
@@ -419,7 +417,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: Colors.deepPurple,
+                  color: AppTheme.primaryPurple,
                 ),
               ),
               Text(
@@ -427,7 +425,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: Colors.deepPurple,
+                  color: AppTheme.primaryPurple,
                 ),
               ),
             ],
@@ -445,10 +443,10 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey[50],
+          color: AppTheme.background,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: widget.acceptTerms ? Colors.deepPurple : Colors.grey[300]!,
+            color: widget.acceptTerms ? AppTheme.primaryPurple : Colors.grey[300]!,
           ),
         ),
         child: Row(
@@ -457,10 +455,10 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
               width: 24,
               height: 24,
               decoration: BoxDecoration(
-                color: widget.acceptTerms ? Colors.deepPurple : Colors.transparent,
+                color: widget.acceptTerms ? AppTheme.primaryPurple : Colors.transparent,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
-                  color: widget.acceptTerms ? Colors.deepPurple : Colors.grey[400]!,
+                  color: widget.acceptTerms ? AppTheme.primaryPurple : Colors.grey[400]!,
                   width: 2,
                 ),
               ),
@@ -485,7 +483,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
                     TextSpan(
                       text: 'köpvillkoren',
                       style: TextStyle(
-                        color: Colors.deepPurple,
+                        color: AppTheme.primaryPurple,
                         fontWeight: FontWeight.w600,
                         decoration: TextDecoration.underline,
                       ),
@@ -494,7 +492,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
                     TextSpan(
                       text: 'integritetspolicyn',
                       style: TextStyle(
-                        color: Colors.deepPurple,
+                        color: AppTheme.primaryPurple,
                         fontWeight: FontWeight.w600,
                         decoration: TextDecoration.underline,
                       ),
@@ -518,7 +516,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
             child: OutlinedButton(
               onPressed: widget.onBack,
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Colors.deepPurple),
+                side: const BorderSide(color: AppTheme.primaryPurple),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -529,7 +527,7 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.deepPurple,
+                  color: AppTheme.primaryPurple,
                 ),
               ),
             ),
@@ -540,14 +538,14 @@ class _CheckoutOverviewStepState extends State<CheckoutOverviewStep> {
             child: ElevatedButton(
               onPressed: widget.acceptTerms ? widget.onPlaceOrder : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
+                backgroundColor: AppTheme.primaryPurple,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 elevation: 0,
-                disabledBackgroundColor: Colors.grey[300],
+                disabledBackgroundColor: Color.fromARGB(255, 201, 184, 227),
               ),
               child: Text(
                 'Slutför köp • ${total.toStringAsFixed(2)} kr',

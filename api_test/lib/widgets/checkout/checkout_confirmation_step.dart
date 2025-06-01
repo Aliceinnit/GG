@@ -1,3 +1,5 @@
+import 'package:api_test/app_theme.dart';
+import 'package:api_test/pages/history_view.dart';
 import 'package:flutter/material.dart';
 
 class CheckoutConfirmationStep extends StatelessWidget {
@@ -12,13 +14,14 @@ class CheckoutConfirmationStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16),
+    return SingleChildScrollView(
+      
       child: Center(
         child: Container(
+          margin: const EdgeInsets.all(16),
           constraints: const BoxConstraints(maxWidth: 400),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.headerGreen,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
@@ -67,7 +70,7 @@ class CheckoutConfirmationStep extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black87,
+                  color: AppTheme.primaryPurple,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -78,7 +81,7 @@ class CheckoutConfirmationStep extends StatelessWidget {
                 'Din order har mottagits och behandlas nu. Du kommer få en bekräftelse via e-post inom kort.',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey[600],
+                  color: AppTheme.primaryPurple,
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
@@ -90,9 +93,9 @@ class CheckoutConfirmationStep extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.05),
+                  color: AppTheme.primaryPurple.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.green.withOpacity(0.2)),
+                  border: Border.all(color: AppTheme.primaryPurple.withOpacity(0.2)),
                 ),
                 child: Column(
                   children: [
@@ -100,7 +103,7 @@ class CheckoutConfirmationStep extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.receipt_long_outlined,
-                          color: Colors.green,
+                          color: AppTheme.primaryPurple,
                           size: 24,
                         ),
                         const SizedBox(width: 12),
@@ -109,7 +112,7 @@ class CheckoutConfirmationStep extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                            color: AppTheme.primaryPurple,
                           ),
                         ),
                       ],
@@ -123,7 +126,7 @@ class CheckoutConfirmationStep extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: Colors.green,
+                            color: AppTheme.primaryPurple,
                             letterSpacing: 1,
                           ),
                         ),
@@ -134,7 +137,7 @@ class CheckoutConfirmationStep extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.1),
+                              color: AppTheme.primaryPurple.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Row(
@@ -143,14 +146,14 @@ class CheckoutConfirmationStep extends StatelessWidget {
                                 Icon(
                                   Icons.copy,
                                   size: 14,
-                                  color: Colors.green,
+                                  color: AppTheme.primaryPurple,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   'Kopiera',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.green,
+                                    color: AppTheme.primaryPurple,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -170,14 +173,14 @@ class CheckoutConfirmationStep extends StatelessWidget {
                 'Leverans',
                 'Du får en bekräftelse när din order är på väg',
                 Icons.local_shipping_outlined,
-                Colors.blue,
+                AppTheme.primaryPurple,
               ),
               const SizedBox(height: 12),
               _buildInfoCard(
                 'Support',
                 'Kontakta oss om du har frågor om din beställning',
                 Icons.support_agent_outlined,
-                Colors.purple,
+                AppTheme.primaryPurple,
               ),
               const SizedBox(height: 32),
               
@@ -189,7 +192,7 @@ class CheckoutConfirmationStep extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: onContinueShopping ?? () => Navigator.pop(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
+                        backgroundColor: AppTheme.primaryPurple,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -197,9 +200,9 @@ class CheckoutConfirmationStep extends StatelessWidget {
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
+                      child: Text(
                         'Fortsätt handla',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        style: AppTheme.headingMedium.copyWith(color: Colors.white),
                       ),
                     ),
                   ),
@@ -207,9 +210,14 @@ class CheckoutConfirmationStep extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton(
-                      onPressed: onViewOrders ?? () => Navigator.pop(context),
+                      onPressed: onViewOrders ?? () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HistoryView()
+                            ),
+                          ),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.deepPurple),
+                        side: const BorderSide(color: AppTheme.primaryPurple),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -220,7 +228,7 @@ class CheckoutConfirmationStep extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.deepPurple,
+                          color: AppTheme.primaryPurple,
                         ),
                       ),
                     ),
@@ -268,7 +276,7 @@ class CheckoutConfirmationStep extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: AppTheme.primaryPurple,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -276,7 +284,7 @@ class CheckoutConfirmationStep extends StatelessWidget {
                   description,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: AppTheme.primaryPurple,
                   ),
                 ),
               ],

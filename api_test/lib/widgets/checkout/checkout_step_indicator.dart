@@ -1,3 +1,4 @@
+import 'package:api_test/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class CheckoutStepIndicator extends StatelessWidget {
@@ -27,7 +28,7 @@ class CheckoutStepIndicator extends StatelessWidget {
                   margin: EdgeInsets.only(right: index < 3 ? 8 : 0),
                   height: 4,
                   decoration: BoxDecoration(
-                    color: isActive || isCompleted ? Colors.deepPurple : Colors.grey[300],
+                    color: isActive || isCompleted ? const Color(0xFF3E2A5E) : Color.fromARGB(255, 201, 184, 227),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -46,11 +47,7 @@ class CheckoutStepIndicator extends StatelessWidget {
               return Expanded(
                 child: Text(
                   stepTitles[index],
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                    color: isActive || isCompleted ? Colors.deepPurple : Colors.grey[500],
-                  ),
+                  style: AppTheme.bodyMedium,
                   textAlign: index == 0 ? TextAlign.start : 
                            index == 3 ? TextAlign.end : TextAlign.center,
                 ),

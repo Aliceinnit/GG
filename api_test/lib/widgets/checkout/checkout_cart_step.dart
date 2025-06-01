@@ -1,3 +1,4 @@
+import 'package:api_test/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:api_test/model/imat_data_handler.dart';
@@ -25,7 +26,7 @@ class CheckoutCartStep extends StatelessWidget {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppTheme.headerGreen,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
@@ -49,11 +50,7 @@ class CheckoutCartStep extends StatelessWidget {
                             ),
                             Text(
                               '${items.length} ${items.length == 1 ? 'artikel' : 'artiklar'}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: AppTheme.bodyMedium
                             ),
                           ],
                         ),
@@ -63,7 +60,7 @@ class CheckoutCartStep extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           itemCount: items.length,
                           separatorBuilder: (context, index) => Divider(
-                            color: Colors.grey[100],
+                            color: AppTheme.background,
                             height: 1,
                           ),
                           itemBuilder: (context, index) {
@@ -71,10 +68,14 @@ class CheckoutCartStep extends StatelessWidget {
                           },
                         ),
                       ),
+                      Divider(
+                        color: AppTheme.background,
+                        height: 1,
+                      ),
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.grey[50],
+                          color: AppTheme.headerGreen,
                           borderRadius: const BorderRadius.only(
                             bottomLeft: Radius.circular(16),
                             bottomRight: Radius.circular(16),
@@ -116,19 +117,12 @@ class CheckoutCartStep extends StatelessWidget {
           const SizedBox(height: 24),
           const Text(
             'Din kundvagn är tom',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
+            style: AppTheme.headingMedium
           ),
           const SizedBox(height: 8),
           Text(
             'Lägg till produkter för att fortsätta med ditt köp',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
+            style: AppTheme.bodyLarge,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
@@ -138,7 +132,7 @@ class CheckoutCartStep extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
+                backgroundColor: AppTheme.primaryPurple,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -166,14 +160,18 @@ class CheckoutCartStep extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: AppTheme.background,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              Icons.shopping_bag_outlined,
-              color: Colors.grey[400],
-              size: 24,
-            ),
+            child: iMat.getImage(item.product) ??
+                            Container(
+                              color: Colors.grey[100],
+                              child: Icon(
+                                Icons.shopping_bag_outlined,
+                                size: 40,
+                                color: Colors.grey[400],
+                              ),
+                            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -192,10 +190,7 @@ class CheckoutCartStep extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${item.product.price.toStringAsFixed(2)} kr/${item.product.unit}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                  style: AppTheme.bodyMedium
                 ),
               ],
             ),
@@ -203,7 +198,7 @@ class CheckoutCartStep extends StatelessWidget {
           const SizedBox(width: 12),
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: AppTheme.background,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -245,7 +240,7 @@ class CheckoutCartStep extends StatelessWidget {
                     child: const Icon(
                       Icons.add,
                       size: 18,
-                      color: Colors.deepPurple,
+                      color: AppTheme.primaryPurple,
                     ),
                   ),
                 ),
@@ -267,42 +262,33 @@ class CheckoutCartStep extends StatelessWidget {
   }
 
   Widget _buildCartTotal(ImatDataHandler iMat) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Delsumma',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.headerGreen,
+        borderRadius: BorderRadius.circular(16), 
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Delsumma', style: AppTheme.headingMedium),
+              Text('${iMat.shoppingCartTotal().toStringAsFixed(2)} kr', style: AppTheme.headingMedium),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Leverans beräknas i nästa steg',
+                style: AppTheme.bodyMedium
               ),
-            ),
-            Text(
-              '${iMat.shoppingCartTotal().toStringAsFixed(2)} kr',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Leverans beräknas i nästa steg',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -313,7 +299,7 @@ class CheckoutCartStep extends StatelessWidget {
       child: ElevatedButton(
         onPressed: canProceed ? onNext : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.deepPurple,
+          backgroundColor: AppTheme.primaryPurple,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
