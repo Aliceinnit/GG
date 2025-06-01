@@ -1,8 +1,10 @@
 import 'package:api_test/app_theme.dart';
 import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/pages/checkout_flow.dart';
+import 'package:api_test/pages/checkout_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:api_test/main.dart';
 
 class CartSidebar extends StatelessWidget {
   final VoidCallback onClose;
@@ -55,7 +57,8 @@ class CartSidebar extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Kundvagn', style: AppTheme.headingMedium),                  GestureDetector(
+                  Text('Kundvagn', style: AppTheme.headingMedium),
+                  GestureDetector(
                     onTap: onClose,
                     child: Container(
                       width: 36,
@@ -81,14 +84,52 @@ class CartSidebar extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppTheme.paddingMedium),
-              
+
               // Cart items
               Expanded(child: _CartItemsList()),
-              
+
               const SizedBox(height: AppTheme.paddingMedium),
-              
+
               // Total and checkout
               _CartSummary(),
+
+              const SizedBox(height: 12),
+
+              // Checkout button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (navigatorKey.currentState == null) {
+                      print('navigatorKey.currentState is NULL in CartSidebar');
+                      return;
+                    }
+
+                    navigatorKey.currentState!.push(
+                      MaterialPageRoute(builder: (context) => const CheckoutFlow()),
+                    );
+
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      onClose();
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryPurple,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Till kassan',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -362,21 +403,6 @@ class _CartSummary extends StatelessWidget {
         ),
         
         const SizedBox(height: AppTheme.paddingMedium),
-        
-        // Checkout button
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: cart.items.isNotEmpty ? () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CheckoutFlow()),
-              );
-            } : null,
-            style: AppTheme.primaryButtonStyle,
-            child: Text('Till kassan', style: AppTheme.buttonTextStyle),
-          ),
-        ),
       ],
     );
   }

@@ -1,6 +1,6 @@
+import 'package:api_test/pages/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:api_test/app_theme.dart';
-import 'package:api_test/pages/account_view.dart';
 import 'package:api_test/pages/favorites_view.dart';
 import 'package:api_test/pages/history_view.dart';
 import 'package:api_test/main.dart'; // Import main.dart to access navigatorKey
@@ -96,7 +96,7 @@ class AccountSidebar extends StatelessWidget {
                           return;
                         }
                         navigatorKey.currentState!.push(
-                          MaterialPageRoute(builder: (context) => const AccountView()),
+                          MaterialPageRoute(builder: (context) => const LoginView()),
                         );
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           onClose();
