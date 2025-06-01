@@ -11,12 +11,14 @@ import 'package:provider/provider.dart';
 import 'package:api_test/widgets/app_navigation_bar.dart';
 import 'package:api_test/pages/account_view.dart'; // Added for sidebar navigation
 import 'package:api_test/pages/favorites_view.dart'; // Added for sidebar navigation
-import 'package:api_test/widgets/cart_view.dart'; // Added for cart overlay
+import 'package:api_test/pages/main_view.dart'; // Added for navigation to main view
 import 'package:api_test/widgets/product_tile.dart'; // Import ProductTile
 import 'package:api_test/main.dart'; // For navigatorKey if sidebar uses global navigation
+import 'package:api_test/widgets/cart_overlay_provider.dart'; // ADDED: For global cart access
 
 class HistoryView extends StatefulWidget {
-  const HistoryView({super.key});
+  final bool expandOrders; // Add this parameter
+  const HistoryView({super.key, this.expandOrders = false}); // Modify constructor
 
   @override
   State<HistoryView> createState() => _HistoryViewState();
@@ -27,13 +29,13 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
   ShoppingList? _selectedShoppingList; // Added to manage expanded shopping list
   late ScrollController _scrollController;
   bool _showSidebar = false;
-  bool _showCartOverlay = false; // Declared _showCartOverlay
-  bool _isInkopslistorExpanded = false; // Declared _isInkopslistorExpanded, initialized to false
-  bool _isOrdrarExpanded = true; // Ordrar open by default
+  // bool _showCartOverlay = false; // REMOVE: No longer needed
+  bool _isInkopslistorExpanded = false; 
+  bool _isOrdrarExpanded = false; // Default to false
 
   // Animation Controllers and Tweens
   late AnimationController _animationController;
-  late Animation<Offset> _cartSlideAnimation;
+  // late Animation<Offset> _cartSlideAnimation; // REMOVE: No longer needed
   late Animation<Offset> _sidebarSlideAnimation;
 
   // State for product search within an expanded shopping list
@@ -51,13 +53,13 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _cartSlideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    // _cartSlideAnimation = Tween<Offset>( // REMOVE: No longer needed
+    //   begin: const Offset(1.0, 0.0),
+    //   end: Offset.zero,
+    // ).animate(CurvedAnimation(
+    //   parent: _animationController,
+    //   curve: Curves.easeInOut,
+    // ));
     _sidebarSlideAnimation = Tween<Offset>(
       begin: const Offset(1.0, 0.0),
       end: Offset.zero,
@@ -65,6 +67,9 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
+
+    // Set _isOrdrarExpanded based on the widget parameter
+    _isOrdrarExpanded = widget.expandOrders;
   }
 
   @override
@@ -82,6 +87,7 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final iMat = Provider.of<ImatDataHandler>(context);
+    final cartProvider = Provider.of<CartOverlayProvider>(context, listen: false); // ADDED
     final orders = iMat.orders;
     final shoppingLists = iMat.shoppingLists; // Get all shopping lists
 
@@ -106,12 +112,13 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
             children: [
               const Text('Inga sparade inköpslistor här ännu.'),
               const SizedBox(height: AppTheme.paddingMedium),
-              ElevatedButton(
+              ElevatedButton.icon( // MODIFIED: Changed to ElevatedButton.icon
+                icon: const Icon(Icons.add, size: 18), // ADDED: Icon
+                label: const Text('Ny inköpslista'), // MODIFIED: Changed child to label
                 style: AppTheme.primaryButtonStyle,
                 onPressed: () {
                   _showCreateShoppingListDialog(context, iMat);
                 },
-                child: const Text('Ny inköpslista'),
               ),
             ],
           ),
@@ -154,8 +161,9 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
                 showSearchBar: false,
                 pageTitle: "Mina inköp", // Updated title
                 onCartPressed: () {
-                  setState(() => _showCartOverlay = true);
-                  _animationController.forward();
+                  // setState(() => _showCartOverlay = true); // REMOVE
+                  // _animationController.forward(); // REMOVE
+                  cartProvider.showCart(); // ADDED: Use global cart provider
                 },
               ),
               Padding(
@@ -173,7 +181,11 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
                       ),
                     ),
                     onPressed: () {
-                      Navigator.pop(context);
+                      // MODIFIED: Navigate to MainView using global navigatorKey and clear stack
+                      navigatorKey.currentState?.pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => const MainView()),
+                        (Route<dynamic> route) => false,
+                      );
                     },
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
@@ -219,13 +231,13 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
             ],
           ),
           // Overlay for Sidebar and Cart
-          if (_showSidebar || _showCartOverlay)
+          if (_showSidebar) // MODIFIED: Removed _showCartOverlay condition
             Positioned.fill(
               child: GestureDetector(
                 onTap: () {
                   setState(() {
                     _showSidebar = false;
-                    _showCartOverlay = false;
+                    // _showCartOverlay = false; // REMOVE
                   });
                   _animationController.reverse();
                 },
@@ -247,16 +259,16 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
                 child: _sidebar(iMat), 
               ),
             ),
-          if (_showCartOverlay)
-            Positioned(
-              top: 0,
-              right: 0,
-              bottom: 0,
-              child: SlideTransition(
-                position: _cartSlideAnimation,
-                child: _cartOverlay(),
-              ),
-            ),
+          // if (_showCartOverlay) // REMOVE: Entire block for local cart overlay
+          //   Positioned(
+          //     top: 0,
+          //     right: 0,
+          //     bottom: 0,
+          //     child: SlideTransition(
+          //       position: _cartSlideAnimation,
+          //       child: _cartOverlay(),
+          //     ),
+          //   ),
         ],
       ),
     );
@@ -324,6 +336,8 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
     if (orders.isEmpty) {
       return const Center(child: Text('Inga ordrar att visa.'));
     }
+    // Sort orders by date in descending order (newest first)
+    orders.sort((a, b) => b.date.compareTo(a.date));
 
     return ListView.builder(
       shrinkWrap: true,
@@ -359,7 +373,7 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
               ),
               const SizedBox(width: 8), // Spacing between heart and order number
               Text(
-                'Order ${order.orderNumber}',
+                '#${order.orderNumber}', // Changed to display #OrderNumber
                 style: TextStyle(
                     fontWeight: FontWeight.w600,
                     color: _selectedOrder == order ? AppTheme.primaryPurple : AppTheme.textPrimary),
@@ -940,52 +954,6 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
               });
             },
             child: const Text('Logga in', style: TextStyle(color: Color(0xFFFCEEF4))),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _cartOverlay() {
-    return Container(
-      width: 320.0,
-      color: const Color(0xffd2ebd8),
-      padding: const EdgeInsets.only(top: 40.0, left:16.0, right: 16.0, bottom: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Align(
-            alignment: Alignment.topRight,
-            child: IconButton(
-              icon: const Icon(Icons.close),
-              tooltip: 'Stäng',
-              onPressed: () {
-                setState(() => _showCartOverlay = false);
-                _animationController.reverse();
-              },
-            ),
-          ),
-          const Text('Kundvagn', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0)),
-          const SizedBox(height: 12.0),
-          const Expanded(child: CartView()),
-          const SizedBox(height: 12.0),
-          ElevatedButton(
-            onPressed: () {
-              setState(() => _showCartOverlay = false);
-              _animationController.reverse().then((_) {
-                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Till kassan (ej implementerat härifrån än)')),
-                );
-              });
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3E2A5E),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              minimumSize: const Size(double.infinity, 50),
-            ),
-            child: const Text('Till kassan', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600)),
           ),
         ],
       ),

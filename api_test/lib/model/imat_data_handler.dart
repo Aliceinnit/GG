@@ -408,20 +408,72 @@ class ImatDataHandler extends ChangeNotifier {
     notifyListeners();
   }
 
-  void placeOrder() async {
-    await InternetHandler.placeOrder();
-    _shoppingCart.clear();
-    notifyListeners();
+  Future<Order?> placeOrder() async {
+    Order? parsedNewOrder; // Order parsed from InternetHandler.placeOrder() response
 
-    // Reload orders
-    var response = await InternetHandler.getOrders();
+    try {
+      String orderJsonResponse = await InternetHandler.placeOrder();
+      if (orderJsonResponse.isNotEmpty) {
+        try {
+          parsedNewOrder = Order.fromJson(jsonDecode(orderJsonResponse));
+        } catch (e) {
+          print("ImatDataHandler: Failed to parse new order JSON response: $e. Response was: $orderJsonResponse");
+          // parsedNewOrder remains null
+        }
+      } else {
+        print("ImatDataHandler: InternetHandler.placeOrder() returned empty response. Assuming order placed, will rely on refetch.");
+      }
+    } catch (e) {
+      print("ImatDataHandler: Error calling InternetHandler.placeOrder(): $e");
+      // Even if placing the order via InternetHandler fails, proceed to clear cart and attempt to reload orders,
+      // as per the original logic flow that might expect cleanup or a specific state.
+      // However, parsedNewOrder will be null, and if reloading also fails or shows no new order, null will be returned.
+    }
 
-    //print('Orders $response');
-    var jsonData = jsonDecode(response) as List;
+    _shoppingCart.clear(); // Clear the cart
 
-    _orders.clear();
-    _orders.addAll(jsonData.map((item) => Order.fromJson(item)).toList());
-    notifyListeners();
+    List<Order> reloadedOrders = [];
+    try {
+      var response = await InternetHandler.getOrders();
+      var jsonData = jsonDecode(response) as List;
+      reloadedOrders = jsonData.map((item) => Order.fromJson(item)).toList();
+      reloadedOrders.sort((a, b) => b.date.compareTo(a.date)); // Sort newest first
+
+      _orders.clear();
+      _orders.addAll(reloadedOrders); // Update the main orders list
+
+    } catch (e) {
+      print("ImatDataHandler: Failed to reload orders after placing an order: $e");
+      // If reloading orders fails, we can't definitively find the new order.
+      // parsedNewOrder might still exist if InternetHandler.placeOrder() returned it,
+      // but it's safer to return null as the overall state is inconsistent.
+      notifyListeners(); // Notify about cart clear and order list update failure
+      return null;
+    }
+
+    Order? finalOrderToReturn;
+    if (parsedNewOrder != null) {
+      // If InternetHandler.placeOrder() gave us an order, try to find its updated instance in the reloaded list
+      finalOrderToReturn = reloadedOrders.firstWhere(
+        (o) => o.orderNumber == parsedNewOrder!.orderNumber, // Or a more robust unique ID like a UUID if available
+        orElse: () {
+          print("ImatDataHandler: Parsed new order (id: ${parsedNewOrder!.orderNumber}) not found in reloaded list. Using parsed one directly.");
+          return parsedNewOrder; // Fallback to the directly parsed one
+        }
+      );
+    } else if (reloadedOrders.isNotEmpty) {
+      // If InternetHandler.placeOrder() didn't give an order, but we reloaded orders,
+      // assume the newest one in the reloaded list is the one.
+      print("ImatDataHandler: No direct order from placeOrder response, using newest from reloaded list.");
+      finalOrderToReturn = reloadedOrders.first;
+    } else {
+      // No order from placeOrder response, and no orders after reload.
+      print("ImatDataHandler: No order from placeOrder response and no orders found after reload.");
+      // finalOrderToReturn remains null
+    }
+
+    notifyListeners(); // Notify after all data operations and potential order identification
+    return finalOrderToReturn;
   }
 
   ///

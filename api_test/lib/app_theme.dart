@@ -5,8 +5,8 @@ class AppTheme {
   static const double paddingTiny = 4.0;
   static const double paddingSmall = 8.0;
   static const double paddingMediumSmall = 12.0;
-  static const double paddingMedium = 16.0;
-  static const double paddingLarge = 24.0;
+  static const double paddingMedium = 18.0; // Increased from 16.0
+  static const double paddingLarge = 28.0; // Increased from 24.0
   static const double paddingHuge = 32.0;
 
   // Color constants
@@ -57,34 +57,34 @@ class AppTheme {
 
   // Text styles
   static const TextStyle headingLarge = TextStyle(
-    fontSize: 24.0, // explicit double
+    fontSize: 28.0, // Increased from 24.0
     fontWeight: FontWeight.bold,
     color: textPrimary,
   );
 
   static const TextStyle headingMedium = TextStyle(
-    fontSize: 20.0, // explicit double
+    fontSize: 24.0, // Increased from 20.0
     fontWeight: FontWeight.w600,
     color: Color(0xFF3E2A5E),
   );
 
   static const TextStyle bodyLarge = TextStyle(
-    fontSize: 16.0, // explicit double
+    fontSize: 20.0, // Increased from 16.0
     color: textPrimary,
   );
 
   static const TextStyle bodyMedium = TextStyle(
-    fontSize: 14.0, // explicit double
+    fontSize: 18.0, // Increased from 14.0
     color: textPrimary,
   );
 
   static const TextStyle bodySmall = TextStyle(
-    fontSize: 12.0, // explicit double
+    fontSize: 16.0, // Increased from 12.0
     color: textSecondary,
   );
 
   static const TextStyle buttonTextStyle = TextStyle(
-    fontSize: 16.0, // explicit double
+    fontSize: 20.0, // Increased from 16.0
     fontWeight: FontWeight.w600,
     color: buttonText,
   );

@@ -261,7 +261,7 @@ class _CheckoutDeliveryStepState extends State<CheckoutDeliveryStep> {
                         Text(
                           timeSlot,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 18, // Increased from 14 to 18
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                             color: isSelected ? AppTheme.primaryPurple : Colors.black87,
                           ),

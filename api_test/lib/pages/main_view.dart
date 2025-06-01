@@ -8,12 +8,16 @@ import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/pages/account_view.dart';
 import 'package:api_test/pages/history_view.dart';
 import 'package:api_test/pages/favorites_view.dart';
+import 'package:api_test/pages/subcategory_view.dart';
 import 'package:api_test/widgets/product_tile.dart';
 import 'package:api_test/widgets/app_navigation_bar.dart';
 import 'package:api_test/main.dart'; // Import main.dart to access navigatorKey
 
 class MainView extends StatefulWidget {
-  const MainView({super.key});
+  final int? initialTabIndex; // Added
+  final bool expandHistoryOrders; // Added
+
+  const MainView({super.key, this.initialTabIndex, this.expandHistoryOrders = false}); // Modified constructor
 
   @override
   State<MainView> createState() => _MainViewState();
@@ -37,7 +41,21 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-  }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.initialTabIndex == 2 && mounted) { // 2 corresponds to History view
+        if (navigatorKey.currentState != null) {
+          navigatorKey.currentState!.pushReplacement( // Using pushReplacement to avoid MainView stacking if not desired
+            MaterialPageRoute(
+              builder: (context) => HistoryView(expandOrders: widget.expandHistoryOrders),
+            ),
+          );
+        } else {
+          print('navigatorKey.currentState is NULL in MainView initState');
+        }
+      }
+    });
+  } // <--- This closing brace was missing
 
   @override
   void dispose() {
@@ -75,7 +93,8 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                 ),
               ),
             ],
-          ),          if (_showSidebar)
+          ),
+          if (_showSidebar)
             Positioned.fill(
               child: GestureDetector(
                 onTap: () {
@@ -91,7 +110,8 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-            ),if (_showSidebar)
+            ), // End of Positioned.fill
+            if (_showSidebar) // Corrected line: separated comma and if
             Positioned(
               top: 64,
               right: 0,
@@ -142,7 +162,14 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
                         leading: Icon(Icons.history, color: AppTheme.primaryPurple),
                         title: Text("Mina inköp", style: AppTheme.bodyLarge), // Changed text here
                         onTap: () {
-                          _showHistoryWithKey(); // Use new method with navigatorKey
+                          // _showHistoryWithKey(); // Use new method with navigatorKey // Original
+                          if (navigatorKey.currentState == null) {
+                            print('navigatorKey.currentState is NULL in MainView for Mina inköp');
+                            return;
+                          }
+                          navigatorKey.currentState!.push(
+                            MaterialPageRoute(builder: (context) => const HistoryView(expandOrders: false)), // Pass default false if opened from sidebar
+                          );
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             if (mounted) {
                               setState(() => _showSidebar = false);
@@ -178,13 +205,6 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
     );
   }
 
-  void _showAccount(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AccountView()),
-    );
-  }
-
   // New method using GlobalKey
   void _showAccountWithKey() {
     if (navigatorKey.currentState == null) {
@@ -193,24 +213,6 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
     }
     navigatorKey.currentState!.push(
       MaterialPageRoute(builder: (context) => const AccountView()),
-    );
-  }
-
-  void _showHistory(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const HistoryView()),
-    );
-  }
-
-  // New method using GlobalKey
-  void _showHistoryWithKey() {
-    if (navigatorKey.currentState == null) {
-      print('navigatorKey.currentState is NULL in MainView _showHistoryWithKey');
-      return;
-    }
-    navigatorKey.currentState!.push(
-      MaterialPageRoute(builder: (context) => const HistoryView()),
     );
   }
 
@@ -232,12 +234,13 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
     } else {
       crossAxisCount = 2; // Adjusted for very small screens
     }
+    var iMat = context.watch<ImatDataHandler>(); // Add this line to access iMat
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _weeklyOfferBanner(),
+          _weeklyOfferBanner(iMat), // Pass iMat to the method
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: GridView.builder(
@@ -261,7 +264,7 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
     );
   }
 
-  Widget _weeklyOfferBanner() {
+  Widget _weeklyOfferBanner(ImatDataHandler iMat) { // Add ImatDataHandler parameter
   return Container(
     margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
     padding: const EdgeInsets.all(24),
@@ -291,6 +294,17 @@ class _MainViewState extends State<MainView> with TickerProviderStateMixin {
               ),
               onPressed: () {
                 // Lägg till valfri navigation eller funktion
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SubcategoryView(
+                      category: ProductCategory.UNDEFINED, // As "Erbjudanden" is UNDEFINED
+                      headcategory: 'Erbjudanden',
+                      subcategoryName: 'Visa alla',
+                      products: iMat.products, // Pass all products as placeholder
+                    ),
+                  ),
+                );
               },
               child: Text('Börja handla', style: AppTheme.buttonTextStyle),
             ),

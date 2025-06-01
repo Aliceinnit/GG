@@ -6,12 +6,12 @@ import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/widgets/product_tile.dart';
 import 'package:api_test/pages/account_view.dart'; // Added for sidebar navigation
 import 'package:api_test/pages/history_view.dart' as HistoryViewPage; // Added for sidebar navigation and to prevent name clashes
-import 'package:api_test/widgets/cart_view.dart'; // Added for cart overlay
 import 'package:api_test/model/imat/order.dart'; // Added for Order type
 import 'package:intl/intl.dart'; // Added for DateFormat
 import 'package:api_test/app_theme.dart'; // Added for AppTheme
 import 'package:api_test/model/imat/shopping_item.dart'; // Added for ShoppingItem
 import 'package:api_test/model/imat/shopping_list.dart'; // Added for ShoppingList type
+import 'package:api_test/widgets/cart_overlay_provider.dart'; // ADDED: For global cart access
 
 class FavoritesView extends StatefulWidget {
   const FavoritesView({super.key});
@@ -23,9 +23,7 @@ class FavoritesView extends StatefulWidget {
 class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateMixin { // Added TickerProviderStateMixin
   late ScrollController _scrollController;
   bool _showSidebar = false; // Added
-  bool _showCartOverlay = false; // Added
   late AnimationController _animationController; // Added
-  late Animation<Offset> _cartSlideAnimation; // Added
   late Animation<Offset> _sidebarSlideAnimation; // Added
 
   // State for expansion tiles
@@ -46,13 +44,6 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _cartSlideAnimation = Tween<Offset>( // Added initialization
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
     _sidebarSlideAnimation = Tween<Offset>( // Added initialization
       begin: const Offset(1.0, 0.0),
       end: Offset.zero,
@@ -77,6 +68,7 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final iMat = Provider.of<ImatDataHandler>(context);
+    final cartProvider = Provider.of<CartOverlayProvider>(context, listen: false); // ADDED
     final favoriteProducts = iMat.favorites; // Use live favorites list
     final favoriteOrders = iMat.favoriteOrders; // Get favorite orders
     final favoriteShoppingLists = iMat.favoriteShoppingLists; // Get favorite shopping lists
@@ -188,8 +180,9 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
                 showSearchBar: false,
                 pageTitle: "Favoriter",
                 onCartPressed: () { // Added
-                  setState(() => _showCartOverlay = true);
-                  _animationController.forward();
+                  // setState(() => _showCartOverlay = true); // REMOVE
+                  // _animationController.forward(); // REMOVE
+                  cartProvider.showCart(); // ADDED: Use global cart provider
                 },
               ),
               // Back Button
@@ -282,13 +275,13 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
             ],
           ),
           // Overlay for Sidebar and Cart (Added)
-          if (_showSidebar || _showCartOverlay)
+          if (_showSidebar) // MODIFIED: Removed _showCartOverlay condition
             Positioned.fill(
               child: GestureDetector(
                 onTap: () {
                   setState(() {
                     _showSidebar = false;
-                    _showCartOverlay = false;
+                    // _showCartOverlay = false; // REMOVE
                   });
                   _animationController.reverse();
                 },
@@ -309,17 +302,6 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
               child: SlideTransition(
                 position: _sidebarSlideAnimation,
                 child: _sidebar(iMat), // Pass iMat
-              ),
-            ),
-
-          if (_showCartOverlay)
-            Positioned(
-              top: 0,
-              right: 0,
-              bottom: 0,
-              child: SlideTransition(
-                position: _cartSlideAnimation,
-                child: _cartOverlay(),
               ),
             ),
         ],
@@ -435,56 +417,6 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
               });
             },
             child: const Text('Logga in', style: TextStyle(color: Color(0xFFFCEEF4))), // AppTheme.buttonText
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Added _cartOverlay method (adapted from previous versions)
-  Widget _cartOverlay() {
-    return Container(
-      width: 320,
-      color: const Color(0xffd2ebd8),
-      padding: const EdgeInsets.only(top: 40, left:16, right: 16, bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Align(
-            alignment: Alignment.topRight,
-            child: IconButton(
-              icon: const Icon(Icons.close),
-              tooltip: 'Stäng',
-              onPressed: () {
-                setState(() => _showCartOverlay = false);
-                _animationController.reverse();
-              },
-            ),
-          ),
-          const Text('Kundvagn', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)), // Added fontSize
-          const SizedBox(height: 12),
-          const Expanded(child: CartView()),
-          const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: () {
-              // Navigate to checkout
-              setState(() => _showCartOverlay = false);
-              _animationController.reverse().then((_) {
-                // TODO: Implement navigation to CheckoutFlow if needed from here
-                // Navigator.push(context, MaterialPageRoute(builder: (context) => const CheckoutFlow()));
-                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Till kassan (ej implementerat härifrån än)')),
-                );
-              });
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3E2A5E), // AppTheme.primaryPurple
-              foregroundColor: Colors.white, // AppTheme.buttonText
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              minimumSize: const Size(double.infinity, 50),
-            ),
-            child: const Text('Till kassan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           ),
         ],
       ),

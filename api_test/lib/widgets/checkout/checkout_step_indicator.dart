@@ -47,7 +47,10 @@ class CheckoutStepIndicator extends StatelessWidget {
               return Expanded(
                 child: Text(
                   stepTitles[index],
-                  style: AppTheme.bodyMedium,
+                  style: AppTheme.bodyMedium.copyWith(
+                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                    color: isActive ? AppTheme.primaryPurple : (isCompleted ? AppTheme.textPrimary : AppTheme.textSecondary)
+                  ),
                   textAlign: index == 0 ? TextAlign.start : 
                            index == 3 ? TextAlign.end : TextAlign.center,
                 ),

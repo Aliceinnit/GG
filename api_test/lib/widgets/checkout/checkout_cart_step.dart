@@ -196,9 +196,11 @@ class CheckoutCartStep extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
+          // Updated Quantity Controls to match cart_sidebar.dart
           Container(
+            height: 32,
             decoration: BoxDecoration(
-              color: AppTheme.background,
+              color: AppTheme.primaryPurple.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -213,21 +215,32 @@ class CheckoutCartStep extends StatelessWidget {
                     }
                   },
                   child: Container(
-                    padding: const EdgeInsets.all(8),
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryPurple,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(8),
+                        bottomLeft: Radius.circular(8),
+                      ),
+                    ),
                     child: Icon(
                       Icons.remove,
+                      color: AppTheme.buttonText, // Assumes AppTheme.buttonText is defined (e.g., Colors.white)
                       size: 18,
-                      color: Colors.grey[700],
                     ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  width: 40,
+                  height: 32,
+                  alignment: Alignment.center,
                   child: Text(
-                    item.amount.toStringAsFixed(0),
+                    item.amount.toInt().toString(),
                     style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.primaryPurple,
                     ),
                   ),
                 ),
@@ -236,11 +249,19 @@ class CheckoutCartStep extends StatelessWidget {
                     iMat.shoppingCartUpdate(item, delta: 1);
                   },
                   child: Container(
-                    padding: const EdgeInsets.all(8),
-                    child: const Icon(
-                      Icons.add,
-                      size: 18,
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
                       color: AppTheme.primaryPurple,
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(8),
+                        bottomRight: Radius.circular(8),
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.add,
+                      color: AppTheme.buttonText, // Assumes AppTheme.buttonText is defined
+                      size: 18,
                     ),
                   ),
                 ),

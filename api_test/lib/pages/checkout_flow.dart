@@ -1,4 +1,5 @@
 import 'package:api_test/app_theme.dart';
+import 'package:api_test/model/imat/order.dart'; // Import Order model
 import 'package:api_test/widgets/app_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,7 @@ class _CheckoutFlowState extends State<CheckoutFlow> {
   String selectedDeliveryMethod = 'Hemleverans';
   String selectedPaymentMethod = 'Kortbetalning';
   bool acceptTerms = false;
+  Order? _placedOrder; // Add state variable for the placed order
 
   final List<String> stepTitles = [
     'Kundvagn',
@@ -111,10 +113,14 @@ class _CheckoutFlowState extends State<CheckoutFlow> {
           },
           onPlaceOrder: () async {
             // Place the order
-            context.read<ImatDataHandler>().placeOrder();
-            setState(() {
-              currentStep = 4;
-            });
+            final newOrder = await context.read<ImatDataHandler>().placeOrder(); // Call and get the order
+            print("CheckoutFlow: placeOrder returned orderNumber: ${newOrder?.orderNumber}"); // Added log
+            if (mounted) { // Added mounted check
+              setState(() {
+                _placedOrder = newOrder; // Store the placed order
+                currentStep = 4;
+              });
+            }
           },
           onBack: () {
             setState(() {
@@ -123,10 +129,30 @@ class _CheckoutFlowState extends State<CheckoutFlow> {
           },
         );
       case 4:
-        return CheckoutConfirmationStep(
-          onContinueShopping: () => Navigator.pop(context),
-          onViewOrders: () => Navigator.pop(context),
-        );
+        // return CheckoutConfirmationStep( // Old call
+        //   onContinueShopping: () => Navigator.pop(context),
+        //   onViewOrders: () => Navigator.pop(context),
+        // );
+        if (_placedOrder != null) {
+          return CheckoutConfirmationStep(
+            placedOrder: _placedOrder!, // Pass the placed order
+            onContinueShopping: () => Navigator.popUntil(context, (route) => route.isFirst), // Go to main view
+            // onViewOrders will use its default navigation to MainView with history tab
+          );
+        } else {
+          // If _placedOrder is null, show a loading indicator or an error message.
+          // This case should ideally not be reached if placeOrder is successful and returns an order.
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text("Väntar på orderbekräftelse..."),
+              ],
+            ),
+          );
+        }
       default:
         return CheckoutCartStep(
           onNext: () {

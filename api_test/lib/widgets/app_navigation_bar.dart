@@ -40,6 +40,8 @@ class AppNavigationBar extends StatefulWidget {
 class _AppNavigationBarState extends State<AppNavigationBar> {
   final TextEditingController _searchController = TextEditingController();
   static final LogoHoverState _logoHoverState = LogoHoverState();
+  bool _isAccountHovered = false;
+  bool _isCartHovered = false;
 
   @override
   void dispose() {
@@ -135,7 +137,7 @@ class _AppNavigationBarState extends State<AppNavigationBar> {
                   child: Transform.translate(
                     offset: const Offset(20, 30), // Move left and down
                     child: Transform.scale(
-                      scale: 1.8, // Make the logo bigger while keeping container size
+                      scale: 2.0, // Increased from 1.8
                       child: Image.asset(
                         'assets/images/logo.png',
                         fit: BoxFit.cover,
@@ -217,77 +219,108 @@ class _AppNavigationBarState extends State<AppNavigationBar> {
   }  Widget _buildRightIcons(BuildContext context) {
     return Row(
       children: [        // Account icon
-        AccountIconWidget(
-          onPressed: () {
-            final accountProvider = Provider.of<AccountOverlayProvider>(context, listen: false);
-            accountProvider.showAccount();
-          },
+        MouseRegion(
+          onEnter: (_) => setState(() => _isAccountHovered = true),
+          onExit: (_) => setState(() => _isAccountHovered = false),
+          cursor: SystemMouseCursors.click,
+          child: AccountIconWidget(
+            isHovered: _isAccountHovered, // Pass hover state
+            onPressed: () {
+              final accountProvider = Provider.of<AccountOverlayProvider>(context, listen: false);
+              accountProvider.showAccount();
+            },
+          ),
         ),
         
-        const SizedBox(width: AppTheme.paddingMedium),
+        const SizedBox(width: AppTheme.paddingSmall), // Reduced from AppTheme.paddingMedium
         
         // Shopping cart icon with badge
-        _buildCartIcon(context),
+        MouseRegion(
+          onEnter: (_) => setState(() => _isCartHovered = true),
+          onExit: (_) => setState(() => _isCartHovered = false),
+          cursor: SystemMouseCursors.click,
+          child: _buildCartIcon(context, _isCartHovered), // Pass hover state
+        ),
       ],
     );
   }
 
-  Widget _buildCartIcon(BuildContext context) {
+  Widget _buildCartIcon(BuildContext context, bool isHovered) {
     return Consumer<ImatDataHandler>(
       builder: (context, iMat, child) {
         final cartItemCount = iMat.getShoppingCart().items.length;
         
-        return Stack(
-          children: [            Column(
+        return GestureDetector(
+          onTap: () {
+            // Use widget.onCartPressed if available, otherwise default behavior
+            if (widget.onCartPressed != null) {
+              widget.onCartPressed!();
+            } else {
+              final cartProvider = Provider.of<CartOverlayProvider>(context, listen: false);
+              cartProvider.showCart();
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingSmall, vertical: 1), // Reduced horizontal padding
+            decoration: isHovered
+                ? BoxDecoration(
+                    color: Colors.grey.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(30.0),
+                  )
+                : null,
+            child: Column( // Changed from Stack to Column for simpler layout
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center, // Center items vertically
               children: [
-                GestureDetector(
-                  onTap: () {
-                    final cartProvider = Provider.of<CartOverlayProvider>(context, listen: false);
-                    cartProvider.showCart();
-                  },
-                  child: Icon(
-                    Icons.shopping_bag_outlined,
-                    color: AppTheme.primaryPurple,
-                    size: 40,
-                  ),
+                Stack( // Stack for icon and badge
+                  alignment: Alignment.topRight,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4), // Add some padding to push icon down for badge
+                      child: Icon(
+                        Icons.shopping_bag_outlined,
+                        color: AppTheme.primaryPurple,
+                        size: 36, // Reduced from 38
+                      ),
+                    ),
+                    if (cartItemCount > 0)
+                      Container(
+                        padding: const EdgeInsets.all(3), 
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryPurple,
+                          shape: BoxShape.circle, 
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18, // Reduced from 19
+                          minHeight: 18, // Reduced from 19
+                        ),
+                        child: Text(
+                          cartItemCount.toString(),
+                          style: TextStyle(
+                            color: AppTheme.buttonText,
+                            fontSize: 11, // Reduced from 12
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                  ],
                 ),
-                const SizedBox(height: 2),
+                // const SizedBox(height: 1), 
                 Text(
                   'Varukorg',
                   style: TextStyle(
                     color: AppTheme.primaryPurple,
-                    fontSize: 16,
+                    fontSize: 14, // Reduced from 16
                     fontWeight: FontWeight.w500,
                   ),
+                  overflow: TextOverflow.ellipsis, 
                 ),
               ],
             ),
-            if (cartItemCount > 0)
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(4),                  decoration: BoxDecoration(
-                    color: AppTheme.primaryPurple,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 20,
-                    minHeight: 20,
-                  ),                  child: Text(
-                    cartItemCount.toString(),
-                    style: TextStyle(
-                      color: AppTheme.buttonText,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-          ],
+          ),
         );
       },
-    );  }
+    );
+  }
 }

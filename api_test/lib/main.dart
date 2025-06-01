@@ -34,27 +34,33 @@ class MyApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       title: 'iMat Demo',      theme: ThemeData(
         colorScheme: AppTheme.colorScheme,
-        // Add text theme to prevent yellow underlines
-        textTheme: const TextTheme(
-          displayLarge: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
-          displayMedium: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
-          displaySmall: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
-          headlineLarge: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
-          headlineMedium: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
-          headlineSmall: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
-          titleLarge: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
-          titleMedium: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
-          titleSmall: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
-          bodyLarge: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
-          bodyMedium: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
-          bodySmall: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
-          labelLarge: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
-          labelMedium: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
-          labelSmall: TextStyle(color: AppTheme.textPrimary, decoration: TextDecoration.none),
+        // Apply AppTheme text styles and ensure no underlines
+        textTheme: TextTheme(
+          displayLarge: AppTheme.headingLarge,
+          displayMedium: AppTheme.headingLarge, // You can adjust this if AppTheme.headingLarge is too big for displayMedium
+          displaySmall: AppTheme.headingMedium,
+          headlineLarge: AppTheme.headingLarge,
+          headlineMedium: AppTheme.headingMedium,
+          headlineSmall: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w600), // Example: using bodyLarge with emphasis
+          titleLarge: AppTheme.headingMedium,    // Often used for AppBar titles, dialog titles
+          titleMedium: AppTheme.bodyLarge,     // Standard for list item titles
+          titleSmall: AppTheme.bodyMedium,    // Smaller titles or captions
+          bodyLarge: AppTheme.bodyLarge,
+          bodyMedium: AppTheme.bodyMedium,    // Default text style for most content
+          bodySmall: AppTheme.bodySmall,
+          labelLarge: AppTheme.buttonTextStyle, // Specifically for button text
+          labelMedium: AppTheme.bodySmall.copyWith(fontWeight: FontWeight.w500), // Example for input labels
+          labelSmall: AppTheme.bodySmall,     // For the smallest labels
+        ).apply(
+          decoration: TextDecoration.none, // Apply no underline globally to all text styles in the theme
+          // The colors defined in each AppTheme TextStyle (e.g., AppTheme.textPrimary, AppTheme.textSecondary, AppTheme.buttonText)
+          // will be preserved as they are part of the specific TextStyle objects.
         ),
         // Ensure no underlines on buttons and other elements
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
+            // textStyle will be derived from theme.textTheme.labelLarge by default
+            // We only need to ensure decoration is none if not covered by global apply
             textStyle: const TextStyle(decoration: TextDecoration.none),
           ),
         ),

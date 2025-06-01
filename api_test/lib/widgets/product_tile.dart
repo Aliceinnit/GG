@@ -34,8 +34,8 @@ class _AnimatedProductTileButtonState extends State<_AnimatedProductTileButton> 
     Widget buttonContent = Transform.scale(
       scale: scale,
       child: Container(
-        width: 32,
-        height: 32,
+        width: 36, // Increased from 32
+        height: 36, // Increased from 32
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: widget.borderRadius,
@@ -50,7 +50,7 @@ class _AnimatedProductTileButtonState extends State<_AnimatedProductTileButton> 
         child: Icon(
           widget.icon,
           color: AppTheme.buttonText,
-          size: 18,
+          size: 22, // Increased from 18
         ),
       ),
     );
@@ -103,8 +103,9 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
   late Animation<double> _elevationAnimation;
   late Animation<Color?> _borderColorAnimation;
   bool _isFlipped = false;
-  bool _isHovered = false;
-  late int _shoppingListQuantity; // State for quantity in shopping list context
+  bool _isHovered = false; // General tile hover
+  bool _isHeartHovered = false; // Specific hover for the heart icon
+  int _shoppingListQuantity = 1;
 
   @override
   void initState() {
@@ -352,7 +353,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                           Text(
                             widget.product.name,
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 20, // Increased from 16
                               fontWeight: FontWeight.w700,
                               color: AppTheme.textPrimary,
                             ),
@@ -367,14 +368,14 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                               children: [
                                 Icon(
                                   Icons.info_outline,
-                                  size: 14,
+                                  size: 18, // Increased from 14
                                   color: AppTheme.textSecondary,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   "Tryck för detaljer", // Changed text here
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 16, // Increased from 12
                                     color: AppTheme.textSecondary,
                                     // decoration: TextDecoration.underline, // Optional: if you want underline
                                   ),
@@ -392,7 +393,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                         Text(
                           '${widget.product.price.toStringAsFixed(2)} ${widget.product.unit}',
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 20, // Increased from 16
                             fontWeight: FontWeight.w700,
                             color: AppTheme.primaryPurple,
                           ),
@@ -413,38 +414,76 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
               ),
             ),
           ],
-        ),        Positioned(
+        ),
+        // Favorite Icon with Tooltip and Hover Effect
+        Positioned(
           top: 8,
           left: 8,
-          child: GestureDetector(
-            onTap: () {
-              iMat.toggleFavorite(widget.product);
-            },            child: Icon(
-              Icons.favorite,
-              color: isFavorite ? AppTheme.primaryPurple : Colors.white,
-              size: 32,
-              shadows: [
-                Shadow(
-                  color: AppTheme.primaryPurple,
-                  blurRadius: 0,
-                  offset: Offset(1, 0),
+          child: Tooltip(
+            message: isFavorite ? "Ta bort från favoriter" : "Lägg till i favoriter",
+            preferBelow: false,
+            child: MouseRegion(
+              onEnter: (_) => setState(() => _isHeartHovered = true),
+              onExit: (_) => setState(() => _isHeartHovered = false),
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+                  bool itemWasFavorite = isFavorite;
+                  iMat.toggleFavorite(widget.product);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+                    if (!itemWasFavorite) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${widget.product.name} har lagts till i favoriter.'),
+                          backgroundColor: AppTheme.primaryPurple,
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${widget.product.name} har tagits bort från favoriter.'),
+                          backgroundColor: AppTheme.error,
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(4.0),
+                  decoration: BoxDecoration(
+                    color: _isHeartHovered // MODIFIED: Apply grey background if hovered, regardless of favorite status
+                        ? Colors.grey.withOpacity(0.2)
+                        : Colors.transparent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.favorite,
+                    color: isFavorite
+                        ? AppTheme.primaryPurple
+                        : (_isHeartHovered
+                            ? Colors.grey[700]
+                            : Colors.white),
+                    size: 32,
+                    shadows: isFavorite
+                        ? [
+                            Shadow(color: Colors.black.withOpacity(0.25), blurRadius: 2, offset: Offset(0, 1)),
+                          ]
+                        : (_isHeartHovered
+                            ? [
+                                Shadow(color: Colors.black.withOpacity(0.25), blurRadius: 2, offset: Offset(0, 1)),
+                              ]
+                            : [
+                                Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: Offset(1, 0)),
+                                Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: Offset(-1, 0)),
+                                Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: Offset(0, 1)),
+                                Shadow(color: AppTheme.primaryPurple, blurRadius: 0, offset: Offset(0, -1)),
+                              ]),
+                  ),
                 ),
-                Shadow(
-                  color: AppTheme.primaryPurple,
-                  blurRadius: 0,
-                  offset: Offset(-1, 0),
-                ),
-                Shadow(
-                  color: AppTheme.primaryPurple,
-                  blurRadius: 0,
-                  offset: Offset(0, 1),
-                ),
-                Shadow(
-                  color: AppTheme.primaryPurple,
-                  blurRadius: 0,
-                  offset: Offset(0, -1),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -458,7 +497,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
       mainAxisAlignment: MainAxisAlignment.end, // Align to the right
       children: [
         Container(
-          height: 32,
+          height: 36, // Increased from 32
           decoration: BoxDecoration(
             color: AppTheme.primaryPurple.withOpacity(0.1), // Background for the number area
             borderRadius: BorderRadius.circular(8),      // Overall rounding for the -/1/+ group
@@ -482,14 +521,14 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                 },
               ),
               Container( // Quantity display
-                width: 36, 
-                height: 32, 
+                width: 40, // Increased from 36
+                height: 36, // Increased from 32
                 alignment: Alignment.center,
                 // No separate decoration; background comes from the parent Container
                 child: Text(
                   _shoppingListQuantity.toString(),
                   style: const TextStyle(
-                    fontSize: 14, // Matched to the reference style in _buildQuantityControls
+                    fontSize: 18, // Increased from 14
                     fontWeight: FontWeight.w700,
                     color: AppTheme.primaryPurple,
                   ),
@@ -519,7 +558,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
           },
           style: AppTheme.primaryButtonStyle.copyWith(
             padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: AppTheme.paddingSmall, vertical: AppTheme.paddingTiny)),
-            textStyle: MaterialStateProperty.all(const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            textStyle: MaterialStateProperty.all(const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)), // Increased from 12
           ),
           child: const Text('Lägg till'),
         ),
@@ -545,7 +584,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
     return Text(
       'Antal: ${widget.historicAmount} $unitSuffix',
       style: const TextStyle(
-        fontSize: 14,
+        fontSize: 18, // Increased from 14
         fontWeight: FontWeight.w700,
         color: AppTheme.textPrimary, // Or AppTheme.primaryPurple
       ),
@@ -571,7 +610,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
               const Text(
                 'Produktinformation',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 20, // Increased from 16
                   fontWeight: FontWeight.w700,
                   color: AppTheme.primaryPurple,
                 ),
@@ -587,7 +626,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                   Text(
                     widget.product.name,
                     style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: 18, // Increased from 14
                       fontWeight: FontWeight.w700,
                       color: AppTheme.textPrimary,
                     ),
@@ -628,7 +667,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                           Text(
                             'Ingen detaljerad information tillgänglig',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 16, // Increased from 12
                               color: Colors.grey[600],
                             ),
                             textAlign: TextAlign.center,
@@ -650,7 +689,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                         const Text(
                           'Pris',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 18, // Increased from 14
                             fontWeight: FontWeight.w600,
                             color: AppTheme.textPrimary,
                           ),
@@ -658,7 +697,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                         Text(
                           '${widget.product.price.toStringAsFixed(2)} ${widget.product.unit}',
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 18, // Increased from 14
                             fontWeight: FontWeight.w700,
                             color: AppTheme.primaryPurple,
                           ),
@@ -702,7 +741,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
                 const Text(
                   'Tryck för att vända tillbaka',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 16, // Increased from 12
                     color: AppTheme.primaryPurple,
                     fontWeight: FontWeight.w600,
                   ),
@@ -722,7 +761,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
         Text(
           label,
           style: const TextStyle(
-            fontSize: 12,
+            fontSize: 16, // Increased from 12
             fontWeight: FontWeight.w600,
             color: AppTheme.primaryPurple,
           ),
@@ -731,7 +770,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
         Text(
           value,
           style: const TextStyle(
-            fontSize: 12,
+            fontSize: 16, // Increased from 12
             color: AppTheme.textPrimary,
           ),
         ),
@@ -763,7 +802,7 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
     return GestureDetector(
       onTap: () {}, // Prevent flip when tapping quantity controls
       child: Container(
-        height: 32,
+        height: 36, // Increased from 32
         decoration: BoxDecoration(
           color: AppTheme.primaryPurple.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8),
@@ -796,13 +835,13 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
               },
             ),
             Container(
-              width: 36,
-              height: 32,
+              width: 40, // Increased from 36
+              height: 36, // Increased from 32
               alignment: Alignment.center,
               child: Text(
                 quantity.toString(),
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 18, // Increased from 14
                   fontWeight: FontWeight.w700,
                   color: AppTheme.primaryPurple,
                 ),

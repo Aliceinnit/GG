@@ -1,13 +1,17 @@
 import 'package:api_test/app_theme.dart';
-import 'package:api_test/pages/history_view.dart';
+// import 'package:api_test/pages/history_view.dart'; // Not directly used for navigation here
+import 'package:api_test/pages/main_view.dart'; // Used for navigation
 import 'package:flutter/material.dart';
+import 'package:api_test/model/imat/order.dart'; // Import Order
 
 class CheckoutConfirmationStep extends StatelessWidget {
+  final Order placedOrder; // Added: to receive the placed order
   final VoidCallback? onContinueShopping;
   final VoidCallback? onViewOrders;
   
   const CheckoutConfirmationStep({
     super.key,
+    required this.placedOrder, // Made placedOrder required
     this.onContinueShopping,
     this.onViewOrders,
   });
@@ -122,7 +126,8 @@ class CheckoutConfirmationStep extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '#${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}',
+                          // '#${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}', // Old client-side generation
+                          '#${placedOrder.orderNumber}', // Use orderNumber from the placedOrder object
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -190,7 +195,7 @@ class CheckoutConfirmationStep extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: onContinueShopping ?? () => Navigator.pop(context),
+                      onPressed: onContinueShopping ?? () => Navigator.popUntil(context, (route) => route.isFirst), // Go to main view
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primaryPurple,
                         foregroundColor: Colors.white,
@@ -210,11 +215,12 @@ class CheckoutConfirmationStep extends StatelessWidget {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton(
-                      onPressed: onViewOrders ?? () => Navigator.push(
+                      onPressed: onViewOrders ?? () => Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => HistoryView()
+                              builder: (context) => const MainView(initialTabIndex: 2, expandHistoryOrders: true) // Navigate to MainView, history tab, expand orders
                             ),
+                            (Route<dynamic> route) => false, // Remove all previous routes
                           ),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: AppTheme.primaryPurple),
@@ -224,7 +230,8 @@ class CheckoutConfirmationStep extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        'Mina beställningar',
+                        // 'Mina beställningar', // Old text
+                        'Mina ordrar', // New text
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
