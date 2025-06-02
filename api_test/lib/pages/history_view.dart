@@ -15,6 +15,7 @@ import 'package:api_test/pages/main_view.dart'; // Added for navigation to main 
 import 'package:api_test/widgets/product_tile.dart'; // Import ProductTile
 import 'package:api_test/main.dart'; // For navigatorKey if sidebar uses global navigation
 import 'package:api_test/widgets/cart_overlay_provider.dart'; // ADDED: For global cart access
+import 'package:api_test/pages/login_view.dart'; // Added for LoginView navigation
 
 class HistoryView extends StatefulWidget {
   final bool expandOrders; // Add this parameter
@@ -87,7 +88,99 @@ class _HistoryViewState extends State<HistoryView> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final iMat = Provider.of<ImatDataHandler>(context);
-    final cartProvider = Provider.of<CartOverlayProvider>(context, listen: false); // ADDED
+    final cartProvider = Provider.of<CartOverlayProvider>(context, listen: false);
+
+    // Check if user is logged in
+    if (!iMat.isLoggedIn) { // Assuming iMat.isLoggedIn getter exists
+      return Scaffold(
+        backgroundColor: const Color(0xFFFDF0F5), // Match FavoritesView background
+        body: Column(
+          children: [
+            AppNavigationBar(
+              showSearchBar: false,
+              pageTitle: "Mina inköp",
+              onCartPressed: () {
+                cartProvider.showCart();
+              },
+            ),
+            // Back Button
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, top: 12.0, bottom: 4.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.arrow_back, color: Color(0xFF3E2A5E)),
+                  label: const Text(
+                    'Tillbaka',
+                    style: TextStyle(
+                      color: Color(0xFF3E2A5E),
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  onPressed: () {
+                    // MODIFIED: Navigate to MainView using global navigatorKey and clear stack
+                    navigatorKey.currentState?.pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => const MainView()),
+                      (Route<dynamic> route) => false,
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      const Icon(Icons.login, size: 80, color: AppTheme.primaryPurple),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Logga in för att se din köphistorik',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Se dina tidigare ordrar och sparade inköpslistor genom att logga in eller skapa ett konto.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
+                      ),
+                      const SizedBox(height: 32),
+                      ElevatedButton(
+                        style: AppTheme.primaryButtonStyle.copyWith(
+                          minimumSize: MaterialStateProperty.all(const Size(250, 50)),
+                          padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: 40, vertical: 15)),
+                        ),
+                        onPressed: () {
+                          // Navigate to login/account view
+                          if (navigatorKey.currentState != null) {
+                            navigatorKey.currentState!.push(
+                              MaterialPageRoute(builder: (context) => const LoginView(redirectTo: '/history')),
+                            );
+                          }
+                        },
+                        child: const Text('Logga in eller Skapa konto', style: TextStyle(fontSize: 18)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Existing code for logged-in users
     final orders = iMat.orders;
     final shoppingLists = iMat.shoppingLists; // Get all shopping lists
 

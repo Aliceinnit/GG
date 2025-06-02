@@ -74,16 +74,21 @@ class _CheckoutCartSummaryState extends State<CheckoutCartSummary> {
                         ),
                       ),
                       Expanded(
-                        child: ListView.separated(
+                        child: ListView.builder(
                           controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
                           itemCount: items.length,
-                          separatorBuilder: (context, index) => Divider(
-                            color: Colors.grey[100],
-                            height: 1,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
                           itemBuilder: (context, index) {
-                            return _buildCartItem(items[index], iMat);
+                            return Column(
+                              children: [
+                                _buildCartItemSimple(items[index], iMat),
+                                if (index < items.length - 1)
+                                  Divider(
+                                    color: Colors.grey[100],
+                                    height: 1,
+                                  ),
+                              ],
+                            );
                           },
                         ),
                       ),
@@ -108,6 +113,181 @@ class _CheckoutCartSummaryState extends State<CheckoutCartSummary> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildCartItemSimple(ShoppingItem item, ImatDataHandler iMat) {
+    // Simple 4-column layout with fixed positions
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: IntrinsicHeight(  // Force all items in row to have same height
+        child: Row(
+          children: [
+            // Column 1: Product image (60px wide)
+            SizedBox(
+              width: 60,
+              child: AspectRatio(
+                aspectRatio: 1, // Square
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: iMat.getImageData(item.product) != null
+                        ? iMat.getImage(item.product)
+                        : Icon(
+                            Icons.shopping_bag_outlined,
+                            color: Colors.grey[400],
+                            size: 24,
+                          ),
+                  ),
+                ),
+              ),
+            ),
+            
+            // Spacing
+            const SizedBox(width: 12),
+            
+            // Column 2: Product details (name, price per unit) - flexible width
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    item.product.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textPrimary,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${item.product.price.toStringAsFixed(2)} kr/${item.product.unit}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Column 3: Quantity controls - STRICTLY 120px wide
+            SizedBox(
+              width: 120,
+              child: Center(
+                child: Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Stack(
+                    children: [
+                      // Minus button (left)
+                      Positioned(
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: 40,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(8),
+                              bottomLeft: Radius.circular(8),
+                            ),
+                            onTap: () {
+                              if (item.amount > 1) {
+                                iMat.shoppingCartUpdate(item, delta: -1);
+                              } else {
+                                iMat.shoppingCartRemove(item);
+                              }
+                            },
+                            child: Center(
+                              child: Icon(
+                                Icons.remove,
+                                size: 18,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      // Amount (center)
+                      Positioned(
+                        left: 40,
+                        top: 0,
+                        bottom: 0,
+                        width: 40,
+                        child: Center(
+                          child: Text(
+                            item.amount.toStringAsFixed(0),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      // Plus button (right)
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: 40,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: const BorderRadius.only(
+                              topRight: Radius.circular(8),
+                              bottomRight: Radius.circular(8),
+                            ),
+                            onTap: () {
+                              iMat.shoppingCartUpdate(item, delta: 1);
+                            },
+                            child: const Center(
+                              child: Icon(
+                                Icons.add,
+                                size: 18,
+                                color: AppTheme.primaryPurple,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            
+            // Column 4: Item total price - fixed 90px wide
+            SizedBox(
+              width: 90,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '${(item.product.price * item.amount).toStringAsFixed(2)} kr',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -153,127 +333,6 @@ class _CheckoutCartSummaryState extends State<CheckoutCartSummary> {
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             ),
             child: const Text('Tillbaka till butiken'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCartItem(ShoppingItem item, ImatDataHandler iMat) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Row(
-        children: [          // Product image
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: iMat.getImageData(item.product) != null
-                  ? iMat.getImage(item.product)
-                  : Icon(
-                      Icons.shopping_bag_outlined,
-                      color: Colors.grey[400],
-                      size: 24,
-                    ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          
-          // Product details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.product.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textPrimary,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${item.product.price.toStringAsFixed(2)} kr/${item.product.unit}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          
-          // Quantity controls
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    if (item.amount > 1) {
-                      iMat.shoppingCartUpdate(item, delta: -1);
-                    } else {
-                      iMat.shoppingCartRemove(item);
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    child: Icon(
-                      Icons.remove,
-                      size: 18,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Text(
-                    item.amount.toStringAsFixed(0),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    iMat.shoppingCartUpdate(item, delta: 1);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    child: const Icon(
-                      Icons.add,
-                      size: 18,
-                      color: AppTheme.primaryPurple,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          
-          // Item total
-          Text(
-            '${(item.product.price * item.amount).toStringAsFixed(2)} kr',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.textPrimary,
-            ),
           ),
         ],
       ),

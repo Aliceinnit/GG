@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:api_test/app_theme.dart';
+import 'package:provider/provider.dart';
+import 'package:api_test/widgets/account_overlay_provider.dart';
 
 class AccountIconWidget extends StatelessWidget {
-  final VoidCallback? onPressed;
   final bool showNotificationBadge;
   final int notificationCount;
   final bool isHovered;
 
   const AccountIconWidget({
     super.key,
-    this.onPressed,
     this.showNotificationBadge = false,
     this.notificationCount = 0,
     this.isHovered = false,
@@ -17,8 +17,13 @@ class AccountIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accountProvider = Provider.of<AccountOverlayProvider>(context, listen: false);
+
     return GestureDetector(
-      onTap: onPressed,
+      onTap: () {
+        // Always show the account sidebar
+        accountProvider.showAccount();
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: AppTheme.paddingSmall, vertical: 1), // Reduced horizontal padding
         decoration: isHovered
@@ -67,7 +72,7 @@ class AccountIconWidget extends StatelessWidget {
             ),
             // const SizedBox(height: 1), 
             Text(
-              'Mina sidor',
+              'Mina sidor', // Changed text to "Mina sidor"
               style: TextStyle(
                 color: AppTheme.primaryPurple,
                 fontSize: 14, // Reduced from 16

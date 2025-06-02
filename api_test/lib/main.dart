@@ -9,11 +9,12 @@ import 'package:api_test/widgets/cart_overlay_provider.dart';
 import 'package:api_test/widgets/account_overlay_provider.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'dart:io' show Platform;
 import 'package:provider/provider.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-void main() {
+void main(List<String> arguments) {
   runApp(
     MultiProvider(
       providers: [
@@ -21,46 +22,61 @@ void main() {
         ChangeNotifierProvider(create: (context) => CartOverlayProvider()),
         ChangeNotifierProvider(create: (context) => AccountOverlayProvider()),
       ],
-      child: const MyApp(),
+      child: MyApp(resetUserData: arguments.contains('--reset-user-data')),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  // This widget is the root of your application.  @override
+  final bool resetUserData;
+  
+  const MyApp({super.key, this.resetUserData = false});
+  
+  @override
   Widget build(BuildContext context) {
+    if (resetUserData) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final dataHandler = Provider.of<ImatDataHandler>(context, listen: false);
+        await dataHandler.reset();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('All user data has been reset'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+        print('User data reset completed');
+      });
+    }
+    
     return MaterialApp(
       navigatorKey: navigatorKey,
-      title: 'iMat Demo',      theme: ThemeData(
+      title: 'iMat Demo',      
+      theme: ThemeData(
         colorScheme: AppTheme.colorScheme,
-        // Apply AppTheme text styles and ensure no underlines
         textTheme: TextTheme(
           displayLarge: AppTheme.headingLarge,
-          displayMedium: AppTheme.headingLarge, // You can adjust this if AppTheme.headingLarge is too big for displayMedium
+          displayMedium: AppTheme.headingLarge,
           displaySmall: AppTheme.headingMedium,
           headlineLarge: AppTheme.headingLarge,
           headlineMedium: AppTheme.headingMedium,
-          headlineSmall: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w600), // Example: using bodyLarge with emphasis
-          titleLarge: AppTheme.headingMedium,    // Often used for AppBar titles, dialog titles
-          titleMedium: AppTheme.bodyLarge,     // Standard for list item titles
-          titleSmall: AppTheme.bodyMedium,    // Smaller titles or captions
+          headlineSmall: AppTheme.bodyLarge.copyWith(fontWeight: FontWeight.w600),
+          titleLarge: AppTheme.headingMedium,
+          titleMedium: AppTheme.bodyLarge,
+          titleSmall: AppTheme.bodyMedium,
           bodyLarge: AppTheme.bodyLarge,
-          bodyMedium: AppTheme.bodyMedium,    // Default text style for most content
+          bodyMedium: AppTheme.bodyMedium,
           bodySmall: AppTheme.bodySmall,
-          labelLarge: AppTheme.buttonTextStyle, // Specifically for button text
-          labelMedium: AppTheme.bodySmall.copyWith(fontWeight: FontWeight.w500), // Example for input labels
-          labelSmall: AppTheme.bodySmall,     // For the smallest labels
+          labelLarge: AppTheme.buttonTextStyle,
+          labelMedium: AppTheme.bodySmall.copyWith(fontWeight: FontWeight.w500),
+          labelSmall: AppTheme.bodySmall,
         ).apply(
-          decoration: TextDecoration.none, // Apply no underline globally to all text styles in the theme
-          // The colors defined in each AppTheme TextStyle (e.g., AppTheme.textPrimary, AppTheme.textSecondary, AppTheme.buttonText)
-          // will be preserved as they are part of the specific TextStyle objects.
+          decoration: TextDecoration.none,
         ),
-        // Ensure no underlines on buttons and other elements
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            // textStyle will be derived from theme.textTheme.labelLarge by default
-            // We only need to ensure decoration is none if not covered by global apply
             textStyle: const TextStyle(decoration: TextDecoration.none),
           ),
         ),
@@ -74,7 +90,9 @@ class MyApp extends StatelessWidget {
             textStyle: const TextStyle(decoration: TextDecoration.none),
           ),
         ),
-      ),      debugShowCheckedModeBanner: false,      builder: (context, child) {
+      ),      
+      debugShowCheckedModeBanner: false,      
+      builder: (context, child) {
         return Material(
           child: AccountOverlayWrapper(
             child: CartOverlayWrapper(
@@ -88,8 +106,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// This code is not used.
-// Included for testing purposes only
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -103,7 +119,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    //loadImage();
   }
 
   void loadImage() async {
@@ -124,28 +139,12 @@ class _HomePageState extends State<HomePage> {
             },
             child: const Center(child: Text('Testa')),
           ),
-          //image ?? CircularProgressIndicator(),
         ],
       ),
     );
   }
 
   void _runTests() async {
-    //_fetchDetails();
-    //var products = await InternetHandler.getProducts();
-
-    //print(products);
-    /*
-    //var favorites = await InternetHandler.getFavorites();
-    //print(favorites);
-
-    var response = await InternetHandler.getProduct(14);
-    print(response);
-
-    var json = jsonDecode(response);
-    Product product = Product.fromJson(json);
-    print('Product ${product.name}');
-*/
     var response = await InternetHandler.getCreditCard();
     dbugPrint(response);
 
@@ -157,18 +156,5 @@ class _HomePageState extends State<HomePage> {
     json = jsonDecode(response);
     Customer customer = Customer.fromJson(json);
     dbugPrint('Customer ${customer.firstName} ${customer.lastName}');
-
-    /*
-    response = await InternetHandler.getUser();
-    print('User ${response}');
-
-    response = await InternetHandler.getOrders();
-    //print('Orders ${response}');
-
-    response = await InternetHandler.getShoppingCart();
-    print('Orders ${response}');
-
-    var image = await InternetHandler.fetchAndCacheImage(25);
-    */
   }
 }

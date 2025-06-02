@@ -22,6 +22,53 @@ class ImatDataHandler extends ChangeNotifier {
     _setUp();
   }
 
+  // Getter for login status
+  bool get isLoggedIn => _user.userName.isNotEmpty; // Assuming username implies login
+
+  // Reset all user data to its initial state
+  // This method is mainly useful during development
+  Future<void> reset() async {
+    // Reset user credentials
+    _user = User('', '');
+    await InternetHandler.setUser(_user);
+    
+    // Reset customer information
+    _customer = Customer('', '', '', '', '', '', '', '');
+    await InternetHandler.setCustomer(_customer);
+    
+    // Reset credit card information
+    _creditCard = CreditCard('', '', 12, 25, '', 0);
+    await InternetHandler.setCreditCard(_creditCard);
+    
+    // Clear shopping cart
+    _shoppingCart.clear();
+    await InternetHandler.setShoppingCart(_shoppingCart);
+    
+    // Clear favorites (we need to do this one by one)
+    List<Product> favsCopy = favorites.toList();
+    for (final product in favsCopy) {
+      _favorites.remove(product.productId);
+      await InternetHandler.removeFavorite(product.productId);
+    }
+    
+    // Clear shopping lists
+    _shoppingLists.clear();
+    
+    // Clear favorite shopping lists
+    _favoriteShoppingLists.clear();
+    
+    // Clear extras
+    _extras = {};
+    await InternetHandler.setExtras(_extras);
+    
+    // Reset any other user-specific data here
+    
+    // Notify listeners to update the UI
+    notifyListeners();
+    
+    print('All user data has been reset');
+  }
+
   // Never changing, only loaded on startup
   List<Product> get products => _products;
 
@@ -253,12 +300,25 @@ class ImatDataHandler extends ChangeNotifier {
   // meddelar gränssnittet att data ändrats
   User getUser() => _user;
 
-  void setUser(User user) async {
+  Future<void> setUser(User user) async { // MODIFIED: Changed to Future<void>
     _user.userName = user.userName;
     _user.password = user.password;
 
     String _ = await InternetHandler.setUser(_user);
     notifyListeners();
+  }
+
+  void logout() {
+    setUser(User('', ''));
+    // You might want to clear other user-specific data here as well, e.g.:
+    // shoppingCartClear();
+    // _customer = Customer('', '', '', '', '', '', '', '');
+    // InternetHandler.setCustomer(_customer);
+    // _creditCard = CreditCard('', '', 12, 25, '', 0);
+    // InternetHandler.setCreditCard(_creditCard);
+    // etc.
+    // For now, this will log out the user by clearing username and password
+    // and persist this empty user state via setUser.
   }
 
   // Returnerar ProductDetail för produkten p
@@ -474,6 +534,33 @@ class ImatDataHandler extends ChangeNotifier {
 
     notifyListeners(); // Notify after all data operations and potential order identification
     return finalOrderToReturn;
+  }
+
+  // Set guest customer information for checkout
+  void setGuestInformation({
+    required String firstName,
+    required String lastName,
+    required String phoneNumber,
+    required String mobilePhoneNumber,
+    required String email,
+    required String address,
+    required String postCode,
+    required String postAddress,
+  }) {
+    _customer = Customer(
+      firstName,
+      lastName,
+      phoneNumber,
+      mobilePhoneNumber,
+      email,
+      address,
+      postCode,
+      postAddress,
+    );
+    
+    // No need to save to persistent storage as this is guest information
+    // But we notify listeners to update UI if needed
+    notifyListeners();
   }
 
   ///

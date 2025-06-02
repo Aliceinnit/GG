@@ -12,6 +12,9 @@ import 'package:api_test/app_theme.dart'; // Added for AppTheme
 import 'package:api_test/model/imat/shopping_item.dart'; // Added for ShoppingItem
 import 'package:api_test/model/imat/shopping_list.dart'; // Added for ShoppingList type
 import 'package:api_test/widgets/cart_overlay_provider.dart'; // ADDED: For global cart access
+import 'package:api_test/main.dart'; // Import main.dart to access navigatorKey
+import 'package:api_test/pages/main_view.dart'; // Import for MainView
+import 'package:api_test/pages/login_view.dart'; // Added for LoginView navigation
 
 class FavoritesView extends StatefulWidget {
   const FavoritesView({super.key});
@@ -69,6 +72,98 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
   Widget build(BuildContext context) {
     final iMat = Provider.of<ImatDataHandler>(context);
     final cartProvider = Provider.of<CartOverlayProvider>(context, listen: false); // ADDED
+
+    // Check if user is logged in
+    if (!iMat.isLoggedIn) { // Assuming iMat.isLoggedIn getter exists
+      return Scaffold(
+        backgroundColor: const Color(0xFFFDF0F5),
+        body: Column(
+          children: [
+            AppNavigationBar(
+              showSearchBar: false,
+              pageTitle: "Favoriter",
+              onCartPressed: () {
+                cartProvider.showCart();
+              },
+            ),
+            // Back Button
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, top: 12.0, bottom: 4.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.arrow_back, color: Color(0xFF3E2A5E)),
+                  label: const Text(
+                    'Tillbaka',
+                    style: TextStyle(
+                      color: Color(0xFF3E2A5E),
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  onPressed: () {
+                    // MODIFIED: Navigate to MainView using global navigatorKey and clear stack
+                    navigatorKey.currentState?.pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => const MainView()),
+                      (Route<dynamic> route) => false,
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      const Icon(Icons.login, size: 80, color: AppTheme.primaryPurple),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Logga in för att se dina favoriter',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Spara produkter, inköpslistor och tidigare ordrar som favoriter för snabb åtkomst.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
+                      ),
+                      const SizedBox(height: 32),
+                      ElevatedButton(
+                        style: AppTheme.primaryButtonStyle.copyWith(
+                          minimumSize: MaterialStateProperty.all(const Size(250, 50)), // Increased button size
+                          padding: MaterialStateProperty.all(const EdgeInsets.symmetric(horizontal: 40, vertical: 15)), // Increased padding
+                        ),
+                        onPressed: () {
+                          // Navigate to login/account view
+                          if (navigatorKey.currentState != null) {
+                            navigatorKey.currentState!.push(
+                              MaterialPageRoute(builder: (context) => const LoginView(redirectTo: '/favorites')), // MODIFIED: Navigate to LoginView with redirectTo
+                            );
+                          }
+                        },
+                        child: const Text('Logga in eller Skapa konto', style: TextStyle(fontSize: 18)), // Increased text size
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Existing code for logged-in users
     final favoriteProducts = iMat.favorites; // Use live favorites list
     final favoriteOrders = iMat.favoriteOrders; // Get favorite orders
     final favoriteShoppingLists = iMat.favoriteShoppingLists; // Get favorite shopping lists
@@ -219,21 +314,21 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
                     _buildExpansionTile(
                       context: context,
                       title: 'Varor',
-                      isExpanded: _isVarorExpanded,
+                      isExpanded: _isVarorExpanded, // This one was correct
                       onExpansionChanged: (expanded) {
                         setState(() {
                           _isVarorExpanded = expanded;
                         });
                       },
                       customChildrenPadding: EdgeInsets.symmetric(horizontal: varorExpansionTileHorizontalChildPadding)
-                          .copyWith(bottom: 16.0, top: 0.0), // Pass custom padding for Varor tile
+                          .copyWith(bottom: 16.0, top: 0.0),
                       children: varorExpansionTileChildren,
                     ),
                     const SizedBox(height: 16),
                     _buildExpansionTile(
                       context: context,
                       title: 'Inköpslistor',
-                      isExpanded: _isInkopslistorExpanded,
+                      isExpanded: _isInkopslistorExpanded, // Use the state variable
                       onExpansionChanged: (expanded) {
                         setState(() {
                           _isInkopslistorExpanded = expanded;
@@ -247,13 +342,13 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
                                 child: const Text('Inga favoritinköpslistor här ännu.'),
                               ),
                             ]
-                          : [_buildFavoriteShoppingListsList(context, favoriteShoppingLists, iMat)], // Use new method
+                          : [_buildFavoriteShoppingListsList(context, favoriteShoppingLists, iMat)],
                     ),
                     const SizedBox(height: 16),
                     _buildExpansionTile(
                       context: context,
                       title: 'Ordrar',
-                      isExpanded: _isOrdrarExpanded,
+                      isExpanded: _isOrdrarExpanded, // Use the state variable
                       onExpansionChanged: (expanded) {
                         setState(() {
                           _isOrdrarExpanded = expanded;
@@ -267,7 +362,7 @@ class _FavoritesViewState extends State<FavoritesView> with TickerProviderStateM
                                 child: const Text('Inga favoritordrar här ännu.'),
                               ),
                             ]
-                          : [_buildOrdersList(context, favoriteOrders)], // Updated to use favoriteOrders
+                          : [_buildOrdersList(context, favoriteOrders)],
                     ),
                   ],
                 ),

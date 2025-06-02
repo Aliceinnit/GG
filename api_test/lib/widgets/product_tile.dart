@@ -2,6 +2,7 @@ import 'package:api_test/model/imat/product.dart';
 import 'package:api_test/model/imat/shopping_item.dart';
 import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/app_theme.dart';
+import 'package:api_test/pages/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -34,8 +35,8 @@ class _AnimatedProductTileButtonState extends State<_AnimatedProductTileButton> 
     Widget buttonContent = Transform.scale(
       scale: scale,
       child: Container(
-        width: 36, // Increased from 32
-        height: 36, // Increased from 32
+        width: 36,
+        height: 36,
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: widget.borderRadius,
@@ -50,7 +51,7 @@ class _AnimatedProductTileButtonState extends State<_AnimatedProductTileButton> 
         child: Icon(
           widget.icon,
           color: AppTheme.buttonText,
-          size: 22, // Increased from 18
+          size: 22,
         ),
       ),
     );
@@ -79,16 +80,16 @@ class ProductTile extends StatefulWidget {
     this.product, {
     super.key,
     this.historicAmount,
-    this.shoppingListContext = false, // New parameter
-    this.initialQuantityForShoppingList = 1, // New parameter
-    this.onAddToShoppingList, // New parameter
+    this.shoppingListContext = false,
+    this.initialQuantityForShoppingList = 1,
+    this.onAddToShoppingList,
   });
 
   final Product product;
   final int? historicAmount;
-  final bool shoppingListContext; // Indicates if the tile is used for adding to a shopping list
-  final int initialQuantityForShoppingList; // Initial quantity for shopping list mode
-  final Function(Product product, int quantity)? onAddToShoppingList; // Callback
+  final bool shoppingListContext;
+  final int initialQuantityForShoppingList;
+  final Function(Product product, int quantity)? onAddToShoppingList;
 
   @override
   State<ProductTile> createState() => _ProductTileState();
@@ -103,8 +104,8 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
   late Animation<double> _elevationAnimation;
   late Animation<Color?> _borderColorAnimation;
   bool _isFlipped = false;
-  bool _isHovered = false; // General tile hover
-  bool _isHeartHovered = false; // Specific hover for the heart icon
+  bool _isHovered = false;
+  bool _isHeartHovered = false;
   int _shoppingListQuantity = 1;
 
   @override
@@ -428,6 +429,46 @@ class _ProductTileState extends State<ProductTile> with TickerProviderStateMixin
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
                 onTap: () {
+                  // Check if user is logged in before allowing to add to favorites
+                  if (!iMat.isLoggedIn) {
+                    // Show popup dialog instead of direct redirection
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor: const Color(0xFFD2EBD8), // Set dialog background to green
+                          title: const Text('Logga in krävs'),
+                          content: const Text('Du behöver logga in för att kunna spara favoriter.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context); // Close dialog
+                              },
+                              child: const Text('Avbryt'),
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primaryPurple, // Set button color to primary purple
+                                foregroundColor: Colors.white, // Set text color to white
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context); // Close dialog
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginView(redirectTo: '/favorites'),
+                                  ),
+                                );
+                              },
+                              child: const Text('Logga in'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    return;
+                  }
+                  
                   bool itemWasFavorite = isFavorite;
                   iMat.toggleFavorite(widget.product);
                   if (mounted) {

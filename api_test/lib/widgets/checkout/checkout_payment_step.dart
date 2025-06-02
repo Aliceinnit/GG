@@ -9,6 +9,7 @@ class CheckoutPaymentStep extends StatefulWidget {
   final Function(String) onPaymentMethodChanged;
   final VoidCallback? onNext;
   final VoidCallback? onBack;
+  final bool isGuest; // Add isGuest parameter
   
   const CheckoutPaymentStep({
     super.key,
@@ -16,6 +17,7 @@ class CheckoutPaymentStep extends StatefulWidget {
     required this.onPaymentMethodChanged,
     this.onNext,
     this.onBack,
+    this.isGuest = false, // Default to false for backward compatibility
   });
 
   @override
@@ -23,6 +25,25 @@ class CheckoutPaymentStep extends StatefulWidget {
 }
 
 class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
+  // Controllers for guest user input
+  final TextEditingController _cardNumberController = TextEditingController();
+  final TextEditingController _cardHolderController = TextEditingController();
+  final TextEditingController _expiryMonthController = TextEditingController();
+  final TextEditingController _expiryYearController = TextEditingController();
+  final TextEditingController _cvvController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+
+  @override
+  void dispose() {
+    _cardNumberController.dispose();
+    _cardHolderController.dispose();
+    _expiryMonthController.dispose();
+    _expiryYearController.dispose();
+    _cvvController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -54,7 +75,8 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
                   ),
                   Expanded(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),                      child: Column(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),                      
+                      child: Column(
                         children: [
                           _buildPaymentOption(
                             'Kortbetalning',
@@ -68,17 +90,20 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
                             'Snabb betalning med mobilen',
                             Icons.phone_android_outlined,
                             AppTheme.primaryPurple
-                            //const Color(0xFFF49FA7),
                           ),
                           const SizedBox(height: 24),
                           if (widget.selectedPaymentMethod == 'Kortbetalning')
-                            Consumer<ImatDataHandler>(
-                              builder: (context, iMat, child) {
-                                return _buildCreditCardInfo(iMat.getCreditCard());
-                              },
-                            ),
+                            widget.isGuest 
+                              ? _buildGuestCreditCardForm() // Use empty form for guests
+                              : Consumer<ImatDataHandler>(
+                                  builder: (context, iMat, child) {
+                                    return _buildCreditCardInfo(iMat.getCreditCard());
+                                  },
+                                ),
                           if (widget.selectedPaymentMethod == 'Swish')
-                            _buildSwishInfo(),
+                            widget.isGuest
+                              ? _buildGuestSwishForm() // Use empty form for guests
+                              : _buildSwishInfo(),
                         ],
                       ),
                     ),
@@ -304,6 +329,235 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
     );
   }
 
+  Widget _buildGuestCreditCardForm() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primaryPurple,
+            AppTheme.primaryPurple,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryPurple.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Ange kortuppgifter',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              // Add auto-fill button for testing
+              TextButton.icon(
+                onPressed: _autoFillCardDetails,
+                icon: const Icon(Icons.bolt, color: Colors.white70, size: 16),
+                label: const Text(
+                  'Auto-fyll',
+                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _cardNumberController,
+            decoration: const InputDecoration(
+              labelText: 'Kortnummer',
+              hintText: 'XXXX XXXX XXXX XXXX',
+              labelStyle: TextStyle(color: Colors.white70),
+              hintStyle: TextStyle(color: Colors.white54),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.white54),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.white),
+              ),
+            ),
+            style: TextStyle(color: Colors.white),
+            keyboardType: TextInputType.number,
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _cardHolderController,
+            decoration: const InputDecoration(
+              labelText: 'Kortinnehavare',
+              hintText: 'Namn som det visas på kortet',
+              labelStyle: TextStyle(color: Colors.white70),
+              hintStyle: TextStyle(color: Colors.white54),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.white54),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.white),
+              ),
+            ),
+            style: TextStyle(color: Colors.white),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _expiryMonthController,
+                  decoration: const InputDecoration(
+                    labelText: 'Månad',
+                    hintText: 'MM',
+                    labelStyle: TextStyle(color: Colors.white70),
+                    hintStyle: TextStyle(color: Colors.white54),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white54),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                  style: TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextFormField(
+                  controller: _expiryYearController,
+                  decoration: const InputDecoration(
+                    labelText: 'År',
+                    hintText: 'YY',
+                    labelStyle: TextStyle(color: Colors.white70),
+                    hintStyle: TextStyle(color: Colors.white54),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white54),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                  style: TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextFormField(
+                  controller: _cvvController,
+                  decoration: const InputDecoration(
+                    labelText: 'CVV',
+                    hintText: 'XXX',
+                    labelStyle: TextStyle(color: Colors.white70),
+                    hintStyle: TextStyle(color: Colors.white54),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white54),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                  style: TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.number,
+                  obscureText: true,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _autoFillCardDetails() {
+    _cardNumberController.text = '4111 1111 1111 1111'; // Visa test number
+    _cardHolderController.text = 'TEST CARDHOLDER';
+    _expiryMonthController.text = '12';
+    _expiryYearController.text = '25';
+    _cvvController.text = '123';
+    _phoneController.text = '0701234567'; // Also fill phone for Swish testing
+
+    // Show a brief confirmation message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Test data filled successfully!'),
+        duration: Duration(seconds: 1),
+        backgroundColor: AppTheme.primaryPurple,
+      ),
+    );
+  }
+
+  Widget _buildGuestSwishForm() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primaryPurple,
+            AppTheme.primaryPurple,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryPurple.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Telefonnummer',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _phoneController,
+            decoration: const InputDecoration(
+              labelText: 'Swish-nummer',
+              hintText: 'Ange ditt telefonnummer',
+              labelStyle: TextStyle(color: Colors.white70),
+              hintStyle: TextStyle(color: Colors.white54),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.white54),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.white),
+              ),
+            ),
+            style: TextStyle(color: Colors.white),
+            keyboardType: TextInputType.phone,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSwishInfo() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -340,53 +594,57 @@ class _CheckoutPaymentStepState extends State<CheckoutPaymentStep> {
     );
   }
   Widget _buildNavigationButtons() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton(
-              onPressed: widget.onBack,
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppTheme.primaryPurple),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        OutlinedButton(
+          onPressed: widget.onBack,
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(color: AppTheme.primaryPurple),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.arrow_back_outlined, size: 18),
+              SizedBox(width: 8),
+              Text(
                 'Tillbaka',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.primaryPurple,
                 ),
               ),
+            ],
+          ),
+        ),
+        ElevatedButton(
+          onPressed: widget.onNext,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.primaryPurple,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            flex: 2,
-            child: ElevatedButton(
-              onPressed: widget.selectedPaymentMethod.isNotEmpty ? widget.onNext : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryPurple,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          child: const Row(
+            children: [
+              Text(
+                'Fortsätt',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                 ),
-                elevation: 0,
-                disabledBackgroundColor: Colors.grey[300],
               ),
-              child: const Text(
-                'Granska beställning',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-            ),
+              SizedBox(width: 8),
+              Icon(Icons.arrow_forward_outlined, size: 18),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

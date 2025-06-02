@@ -4,9 +4,11 @@ import 'package:api_test/widgets/app_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../model/imat_data_handler.dart';
+import 'package:api_test/app_theme.dart';
 
 class LoginView extends StatefulWidget {
-  const LoginView({super.key});
+  final String? redirectTo;
+  const LoginView({super.key, this.redirectTo});
 
   @override
   State<LoginView> createState() => _LoginViewState();
@@ -30,6 +32,35 @@ class _LoginViewState extends State<LoginView> {
       body: Column(
         children: [
           const AppNavigationBar(showSearchBar: false),
+          // Back Button
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0, top: 12.0, bottom: 4.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                icon: const Icon(Icons.arrow_back, color: Color(0xFF3E2A5E)),
+                label: const Text(
+                  'Tillbaka',
+                  style: TextStyle(
+                    color: Color(0xFF3E2A5E),
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                onPressed: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
+                },
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+            ),
+          ),
           const SizedBox(height: 24),
           Expanded(
             child: SingleChildScrollView(
@@ -47,7 +78,7 @@ class _LoginViewState extends State<LoginView> {
         padding: const EdgeInsets.all(24),
         width: 600,
         decoration: BoxDecoration(
-          color: const Color(0xffd2ebd8),
+          color: AppTheme.headerGreen, // Explicitly set to primary green
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -67,16 +98,15 @@ class _LoginViewState extends State<LoginView> {
             ElevatedButton(
               onPressed: () => _handleLogin(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF3A2C4B),
+                backgroundColor: AppTheme.primaryPurple,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                child: Text(
-                  'Logga in',
-                  style: TextStyle(
-                    color: Color(0xFFFFF0F5),
-                    fontWeight: FontWeight.bold,
-                  ),
+              child: const Text(
+                'Logga in',
+                style: TextStyle(
+                  color: Colors.white, // Explicitly set to white
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
               ),
             ),
@@ -84,7 +114,7 @@ class _LoginViewState extends State<LoginView> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const AccountView()),
+                  MaterialPageRoute(builder: (_) => AccountView(redirectTo: widget.redirectTo)),
                 );
               },
               child: const Text(
@@ -123,12 +153,25 @@ class _LoginViewState extends State<LoginView> {
     );
 
     final iMat = Provider.of<ImatDataHandler>(context, listen: false);
-    iMat.setUser(user);
+    await iMat.setUser(user); // Ensure setUser completes before proceeding
+
+    // Check if the widget is still mounted before showing SnackBar or navigating
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Inloggad som ${user.userName}")),
+      SnackBar(
+        content: Text("Inloggad som ${user.userName}"),
+        backgroundColor: AppTheme.primaryPurple,
+      ),
     );
 
-    Navigator.pop(context);
+    // Try to pop to return to the actual previous page first.
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    } else {
+      // If LoginView was the initial route (cannot pop) or if popping is not possible for other reasons,
+      // navigate to the home page ('/') as a simple and safe fallback.
+      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+    }
   }
 }

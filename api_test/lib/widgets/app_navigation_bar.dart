@@ -4,7 +4,6 @@ import 'package:api_test/model/imat_data_handler.dart';
 import 'package:api_test/pages/main_view.dart';
 import 'package:api_test/app_theme.dart';
 import 'package:api_test/widgets/cart_overlay_provider.dart';
-import 'package:api_test/widgets/account_overlay_provider.dart';
 import 'package:api_test/widgets/account_icon_widget.dart';
 
 // Global state for logo hover to persist across navigation
@@ -225,10 +224,6 @@ class _AppNavigationBarState extends State<AppNavigationBar> {
           cursor: SystemMouseCursors.click,
           child: AccountIconWidget(
             isHovered: _isAccountHovered, // Pass hover state
-            onPressed: () {
-              final accountProvider = Provider.of<AccountOverlayProvider>(context, listen: false);
-              accountProvider.showAccount();
-            },
           ),
         ),
         

@@ -4,6 +4,8 @@ import 'package:api_test/app_theme.dart';
 import 'package:api_test/pages/favorites_view.dart';
 import 'package:api_test/pages/history_view.dart';
 import 'package:api_test/main.dart'; // Import main.dart to access navigatorKey
+import 'package:provider/provider.dart'; // Add this import
+import 'package:api_test/model/imat_data_handler.dart'; // Add this import
 
 class AccountSidebar extends StatelessWidget {
   final VoidCallback onClose;
@@ -17,6 +19,8 @@ class AccountSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final imatDataHandler = Provider.of<ImatDataHandler>(context); // Access ImatDataHandler
+
     return Positioned(
       top: 64,
       right: 0,
@@ -87,22 +91,38 @@ class AccountSidebar extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    _buildMenuItem(
-                      icon: Icons.login,
-                      title: 'Logga in',
-                      onTap: () {
-                        if (navigatorKey.currentState == null) {
-                          print('navigatorKey.currentState is NULL in AccountSidebar for Logga in');
-                          return;
-                        }
-                        navigatorKey.currentState!.push(
-                          MaterialPageRoute(builder: (context) => const LoginView()),
-                        );
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          onClose();
-                        });
-                      },
-                    ),
+                    if (imatDataHandler.isLoggedIn)
+                      _buildMenuItem(
+                        icon: Icons.logout,
+                        title: 'Logga ut',
+                        onTap: () {
+                          imatDataHandler.logout();
+                          onClose(); // Close the sidebar
+                          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+                            SnackBar(
+                              content: Text('Du har loggats ut.'),
+                              backgroundColor: AppTheme.primaryPurple,
+                            ),
+                          );
+                        },
+                      )
+                    else
+                      _buildMenuItem(
+                        icon: Icons.login,
+                        title: 'Logga in',
+                        onTap: () {
+                          if (navigatorKey.currentState == null) {
+                            print('navigatorKey.currentState is NULL in AccountSidebar for Logga in');
+                            return;
+                          }
+                          navigatorKey.currentState!.push(
+                            MaterialPageRoute(builder: (context) => const LoginView()),
+                          );
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            onClose();
+                          });
+                        },
+                      ),
                     _buildMenuItem(
                       icon: Icons.favorite,
                       title: 'Favoriter',
